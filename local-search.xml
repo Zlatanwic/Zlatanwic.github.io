@@ -4,6 +4,19 @@
   
   
   <entry>
+    <title>c++小发现</title>
+    <link href="/2025/03/30/c-%E5%B0%8F%E5%8F%91%E7%8E%B0/"/>
+    <url>/2025/03/30/c-%E5%B0%8F%E5%8F%91%E7%8E%B0/</url>
+    
+    <content type="html"><![CDATA[<p>当运行以下c++代码</p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;iostream&gt;</span></span><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;<br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    cout&lt;&lt;<span class="hljs-string">&quot;abc&quot;</span><span class="hljs-number">+1</span>&lt;&lt;endl;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure><p>结果将会是输出”b”</p>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>my-first-blog</title>
     <link href="/2025/03/30/my-first-blog/"/>
     <url>/2025/03/30/my-first-blog/</url>
