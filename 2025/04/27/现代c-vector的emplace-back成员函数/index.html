@@ -19,21 +19,21 @@
   <meta name="author" content="John Doe">
   <meta name="keywords" content="">
   
-    <meta name="description" content="当运行以下c++代码 1234567#include&lt;iostream&gt;using namespace std;int main()&#123;    cout&lt;&lt;&quot;abc&quot;+1&lt;&lt;endl;    return 0;&#125; 结果将会是输出”bc”:原因是”abc”本质是一个字符串字面量是const char[]类型，会退化为const">
+    <meta name="description" content="现代c++标准库中vector容器的emplace_back方法一言以蔽之，emplace_back是c++11引入的vector成员函数，用于在vector末尾直接构造元素，而不是先构造再拷贝或移动 基本用法12std::vector&lt;MyClass&gt;vec;vec.emplace_back(args...); 与push_back的区别 构造方式 push_back：先构造临时对象">
 <meta property="og:type" content="article">
-<meta property="og:title" content="c++小发现">
-<meta property="og:url" content="http://example.com/2025/03/30/c-%E5%B0%8F%E5%8F%91%E7%8E%B0/index.html">
+<meta property="og:title" content="现代c++vector的emplace_back成员函数">
+<meta property="og:url" content="http://example.com/2025/04/27/%E7%8E%B0%E4%BB%A3c-vector%E7%9A%84emplace-back%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0/index.html">
 <meta property="og:site_name" content="Zlatanwic的主页">
-<meta property="og:description" content="当运行以下c++代码 1234567#include&lt;iostream&gt;using namespace std;int main()&#123;    cout&lt;&lt;&quot;abc&quot;+1&lt;&lt;endl;    return 0;&#125; 结果将会是输出”bc”:原因是”abc”本质是一个字符串字面量是const char[]类型，会退化为const">
+<meta property="og:description" content="现代c++标准库中vector容器的emplace_back方法一言以蔽之，emplace_back是c++11引入的vector成员函数，用于在vector末尾直接构造元素，而不是先构造再拷贝或移动 基本用法12std::vector&lt;MyClass&gt;vec;vec.emplace_back(args...); 与push_back的区别 构造方式 push_back：先构造临时对象">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-03-30T13:17:28.000Z">
-<meta property="article:modified_time" content="2025-03-31T15:56:23.374Z">
+<meta property="article:published_time" content="2025-04-27T04:05:20.000Z">
+<meta property="article:modified_time" content="2025-04-27T04:06:33.076Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary_large_image">
   
   
   
-  <title>c++小发现 - Zlatanwic的主页</title>
+  <title>现代c++vector的emplace_back成员函数 - Zlatanwic的主页</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -212,7 +212,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="c++小发现"></span>
+            <span id="subtitle" data-typed-text="现代c++vector的emplace_back成员函数"></span>
           
         </div>
 
@@ -223,8 +223,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2025-03-30 21:17" pubdate>
-          2025年3月30日 晚上
+        <time datetime="2025-04-27 12:05" pubdate>
+          2025年4月27日 中午
         </time>
       </span>
     
@@ -235,7 +235,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          165 字
+          280 字
         
       </span>
     
@@ -246,7 +246,7 @@
         
         
         
-          2 分钟
+          3 分钟
         
       </span>
     
@@ -292,14 +292,22 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">c++小发现</h1>
+            <h1 id="seo-header">现代c++vector的emplace_back成员函数</h1>
             
             
               <div class="markdown-body">
                 
-                <p>当运行以下c++代码</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;iostream&gt;</span></span><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;<br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    cout&lt;&lt;<span class="hljs-string">&quot;abc&quot;</span><span class="hljs-number">+1</span>&lt;&lt;endl;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>结果将会是输出”bc”:<br>原因是”abc”本质是一个字符串字面量是const char[]类型，会退化为const char*的指针类型，也就是该字符串的首地址，而+1会加一个char的基类型，即1字节，也就是将这个地址+1，于是指针就从字符”a”上移动到了字符”b”上，而cout对字符型地址的输出逻辑是从该地址开始一直输出知道遇到尾零结束,所以将从字符”b”开始输出到”c”结束。<br><a href="./c-%E5%B0%8F%E5%8F%91%E7%8E%B0/test.txt">test</a></p>
+                <h1 id="现代c-标准库中vector容器的emplace-back方法"><a href="#现代c-标准库中vector容器的emplace-back方法" class="headerlink" title="现代c++标准库中vector容器的emplace_back方法"></a>现代c++标准库中vector容器的emplace_back方法</h1><p>一言以蔽之，<code>emplace_back</code>是c++11引入的vector成员函数，用于在vector末尾直接构造元素，而不是先构造再拷贝或移动</p>
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c++">std::vector&lt;MyClass&gt;vec;<br>vec.<span class="hljs-built_in">emplace_back</span>(args...);<br></code></pre></td></tr></table></figure>
+<h2 id="与push-back的区别"><a href="#与push-back的区别" class="headerlink" title="与push_back的区别"></a>与push_back的区别</h2><ol>
+<li>构造方式<ul>
+<li><code>push_back</code>：先构造临时对象，然后拷贝或移动到容器中</li>
+<li><code>emplace_back</code>：直接在容器内存中构造对象</li>
+</ul>
+</li>
+<li>emplace_back更高效</li>
+</ol>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span> &#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-built_in">Person</span>(std::string name, <span class="hljs-type">int</span> age) : <span class="hljs-built_in">name_</span>(name), <span class="hljs-built_in">age_</span>(age) &#123;<br>        std::cout &lt;&lt; <span class="hljs-string">&quot;Constructing &quot;</span> &lt;&lt; name_ &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;<br>    &#125;<br>    <br>    <span class="hljs-built_in">Person</span>(<span class="hljs-type">const</span> Person&amp; other) : <span class="hljs-built_in">name_</span>(other.name_), <span class="hljs-built_in">age_</span>(other.age_) &#123;<br>        std::cout &lt;&lt; <span class="hljs-string">&quot;Copying &quot;</span> &lt;&lt; name_ &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;<br>    &#125;<br>    <br>    <span class="hljs-built_in">Person</span>(Person&amp;&amp; other) <span class="hljs-keyword">noexcept</span> : <span class="hljs-built_in">name_</span>(std::<span class="hljs-built_in">move</span>(other.name_)), <span class="hljs-built_in">age_</span>(other.age_) &#123;<br>        std::cout &lt;&lt; <span class="hljs-string">&quot;Moving &quot;</span> &lt;&lt; name_ &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;<br>    &#125;<br><br><span class="hljs-keyword">private</span>:<br>    std::string name_;<br>    <span class="hljs-type">int</span> age_;<br>&#125;;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>&#123;<br>    std::vector&lt;Person&gt; people;<br>    <br>    <span class="hljs-comment">// 使用push_back</span><br>    std::cout &lt;&lt; <span class="hljs-string">&quot;Using push_back:\n&quot;</span>;<br>    people.<span class="hljs-built_in">push_back</span>(<span class="hljs-built_in">Person</span>(<span class="hljs-string">&quot;Alice&quot;</span>, <span class="hljs-number">30</span>));<br>    <span class="hljs-comment">// 输出:</span><br>    <span class="hljs-comment">// Constructing Alice (临时对象)</span><br>    <span class="hljs-comment">// Moving Alice (移动到vector中)</span><br>    <br>    <span class="hljs-comment">// 使用emplace_back</span><br>    std::cout &lt;&lt; <span class="hljs-string">&quot;\nUsing emplace_back:\n&quot;</span>;<br>    people.<span class="hljs-built_in">emplace_back</span>(<span class="hljs-string">&quot;Bob&quot;</span>, <span class="hljs-number">25</span>);<br>    <span class="hljs-comment">// 输出:</span><br>    <span class="hljs-comment">// Constructing Bob (直接在vector中构造)</span><br>    <br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
 
                 
               </div>
@@ -317,8 +325,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>c++小发现</div>
-      <div>http://example.com/2025/03/30/c-小发现/</div>
+      <div>现代c++vector的emplace_back成员函数</div>
+      <div>http://example.com/2025/04/27/现代c-vector的emplace-back成员函数/</div>
     </div>
     <div class="license-meta">
       
@@ -330,7 +338,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2025年3月30日</div>
+          <div>2025年4月27日</div>
         </div>
       
       
@@ -362,18 +370,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2025/04/27/%E7%8E%B0%E4%BB%A3c-vector%E7%9A%84emplace-back%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0/" title="现代c++vector的emplace_back成员函数">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">现代c++vector的emplace_back成员函数</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2025/03/30/my-first-blog/" title="my-first-blog">
-                        <span class="hidden-mobile">my-first-blog</span>
+                      <a href="/2025/03/30/c-%E5%B0%8F%E5%8F%91%E7%8E%B0/" title="c++小发现">
+                        <span class="hidden-mobile">c++小发现</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
