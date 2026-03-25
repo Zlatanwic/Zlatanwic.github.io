@@ -3,6 +3,7 @@ node_modules/
 # VitePress build output and cache
 docs/.vitepress/cache/
 docs/.vitepress/dist/
+docs/.vitepress/.temp/
 
 # OS-generated files
 .DS_Store
