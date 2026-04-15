@@ -2,7 +2,7 @@
 layout: home
 hero:
   name: "Rodebiau"
-  text: "写作、项目与知识生长在同一个地方。"
+  text: "写作、项目与知识生长在同一个地方"
   tagline: "一个兼顾个人主页、博客与知识库的 VitePress 数字花园。这里记录我在技术、写作、系统搭建与长期思考上的实践，也让别人能快速认识我、理解我在做什么、顺着目录继续读下去。"
   image:
     src: /logo.svg
