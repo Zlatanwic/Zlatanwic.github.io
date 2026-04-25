@@ -6,9 +6,9 @@
  *   url      string  — link to paper (arXiv / OpenReview / proceedings); optional
  *   venue    string  — UPPERCASE venue + year, e.g. 'NEURIPS 2024'
  *   category string  — top-level filter bucket, UPPERCASE (drives the chip bar)
- *   area     string  — fine-grained sub-area, UPPERCASE (display only)
+ *   area     string  — fine-grained sub-area, UPPERCASE (display only); optional
  *   status   'read' | 'reading' | 'queued'
- *   takeaway string  — one-line "what it solved / what it left behind"
+ *   takeaway string  — one-line "what it solved / what it left behind"; optional
  *
  * Adding a new category: just type a new value in `category`. The chip bar
  * derives the list automatically.
@@ -20,9 +20,9 @@ export interface Paper {
   url?: string
   venue: string
   category: string
-  area: string
+  area?: string
   status: PaperStatus
-  takeaway: string
+  takeaway?: string
 }
 
 export const papers: Paper[] = [
@@ -85,6 +85,21 @@ export const papers: Paper[] = [
     status: 'queued',
     takeaway:
       '上下文按节点环切，通信与计算流水线化；超长上下文训练绕不开的一篇。'
+  },
+  {
+    title: 'FLASHINFER: EFFICIENT AND CUSTOMIZABLE ATTENTION ENGINE FOR LLMINFERENCE SERVING',
+    url: 'https://arxiv.org/abs/2511.00739',
+    venue: 'MLSys 2025',
+    category: 'INFERENCE',
+    area: 'mlsys fullstack',
+    status:'read'
+  },
+  {
+    title: 'Towards Understanding, Analyzing, and Optimizing Agentic AI Execution: A CPU-Centric Perspective',
+    url: 'https://arxiv.org/abs/2511.00739',
+    venue: 'MLSys 2025',
+    category: 'INFERENCE',
+    status: 'reading'
   }
 ]
 

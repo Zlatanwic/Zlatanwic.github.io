@@ -56,7 +56,7 @@ const statusCount = (s: FilterStatus) => {
       <span class="kicker kicker-uv">READING&nbsp;PAPERS / 论文阅读</span>
       <h1 class="display display-xl">PAPERS.LOG</h1>
       <p class="lede">
-        围绕 LLM 推理、KV cache、kernel 与系统优化整理的阅读清单。每篇尝试用一句话写清楚“它解决了什么、留下了什么”。
+        围绕 LLM 推理、KV cache、kernel 与系统优化整理的阅读清单，持续更新中。
       </p>
 
       <div class="stats">
@@ -142,8 +142,10 @@ const statusCount = (s: FilterStatus) => {
           <span class="dot" :class="p.status"></span>
           <span class="tag tag--ghost cat-tag">{{ p.category }}</span>
           <span class="label-meta">{{ p.venue }}</span>
-          <span class="sep">·</span>
-          <span class="label-meta">{{ p.area }}</span>
+          <template v-if="p.area">
+            <span class="sep">·</span>
+            <span class="label-meta">{{ p.area }}</span>
+          </template>
           <span class="sep">·</span>
           <span class="label-meta status-tag">{{ statusLabel[p.status] }}</span>
         </div>
@@ -159,7 +161,7 @@ const statusCount = (s: FilterStatus) => {
           </a>
           <template v-else>{{ p.title }}</template>
         </h2>
-        <p class="paper-take">{{ p.takeaway }}</p>
+        <p v-if="p.takeaway" class="paper-take">{{ p.takeaway }}</p>
       </li>
     </ul>
 

@@ -4,10 +4,7 @@ export type Locale = 'zh' | 'en'
 
 const STORAGE_KEY = 'rodebiau:locale'
 const initial =
-  (typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_KEY)) ||
-  (typeof navigator !== 'undefined' && navigator.language?.startsWith('zh')
-    ? 'zh'
-    : 'en')
+  (typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_KEY)) || 'en'
 
 export const locale = ref<Locale>(initial === 'zh' ? 'zh' : 'en')
 

@@ -56,3 +56,5 @@ Desktop.ini
 
 # Claude / agent worktrees
 .claude/worktrees/
+
+.playwright-mcp/

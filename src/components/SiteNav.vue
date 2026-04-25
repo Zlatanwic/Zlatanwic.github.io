@@ -25,8 +25,13 @@ const tabs = [
           {{ t.label }}
         </RouterLink>
       </nav>
-      <a class="cta" href="#" @click.prevent>
-        SUBSCRIBE
+      <a
+        class="cta"
+        href="https://github.com/Zlatanwic"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        FOLLOW ON GITHUB
       </a>
     </div>
   </header>
