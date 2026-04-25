@@ -1,64 +1,49 @@
 <script setup>
-const papers = [
-  {
-    title: 'SnapKV: LLM Knows What You are Looking for Before Generation',
-    venue: 'NEURIPS 2024',
-    area: 'KV CACHE',
-    status: 'read',
-    takeaway:
-      '基于 prompt 末段窗口 vote 出关注的 token 位置——简单但偏向 recency；长上下文检索任务上掉得很快。'
-  },
-  {
-    title: 'H2O: Heavy-Hitter Oracle for Efficient Generative Inference of LLMs',
-    venue: 'NEURIPS 2023',
-    area: 'KV CACHE',
-    status: 'read',
-    takeaway:
-      '“近期 + 累积注意力大者” 的两段式保留，奠定后续 eviction 工作的常见 baseline 形态。'
-  },
-  {
-    title: 'PagedAttention / vLLM',
-    venue: 'SOSP 2023',
-    area: 'LLM SERVING',
-    status: 'read',
-    takeaway:
-      '把虚拟内存的分页观念搬到 KV cache：碎片消失，共享前缀几乎免费。kernel 设计是真正的工程亮点。'
-  },
-  {
-    title: 'FlashAttention-2',
-    venue: 'ARXIV 2023',
-    area: 'KERNEL',
-    status: 'read',
-    takeaway:
-      'work partition、warp 调度比 V1 更激进；理解它之后再看 paged 变体会顺很多。'
-  },
-  {
-    title: 'Mamba: Linear-Time Sequence Modeling with Selective State Spaces',
-    venue: 'COLM 2024',
-    area: 'ARCHITECTURE',
-    status: 'reading',
-    takeaway:
-      'selective scan 把 SSM 拉到能和 Transformer 掰手腕；recall 类任务上仍有结构性短板。'
-  },
-  {
-    title: 'Ring Attention with Blockwise Transformers',
-    venue: 'ICLR 2024',
-    area: 'DISTRIBUTED',
-    status: 'queued',
-    takeaway:
-      '上下文按节点环切，通信与计算流水线化；超长上下文训练绕不开的一篇。'
-  }
-]
+import { ref, computed } from 'vue'
+import { papers, statusLabel, statusOrder } from '../data/papers.js'
 
-const statusLabel = {
-  read: '已读',
-  reading: '在读',
-  queued: '待读'
-}
 const counts = {
   read: papers.filter(p => p.status === 'read').length,
   reading: papers.filter(p => p.status === 'reading').length,
   queued: papers.filter(p => p.status === 'queued').length
+}
+
+// Categories derived from data; "ALL" is always first.
+const categories = computed(() => {
+  const set = new Set(papers.map(p => p.category))
+  return ['ALL', ...Array.from(set)]
+})
+
+const activeCategory = ref('ALL')
+const activeStatus = ref('ALL') // 'ALL' | 'read' | 'reading' | 'queued'
+
+// Two-stage filter: category narrows, then status narrows further.
+const filtered = computed(() => {
+  let list = papers
+  if (activeCategory.value !== 'ALL') {
+    list = list.filter(p => p.category === activeCategory.value)
+  }
+  if (activeStatus.value !== 'ALL') {
+    list = list.filter(p => p.status === activeStatus.value)
+  }
+  return list
+})
+
+// Counts aware of the OTHER filter, so chips reflect what clicking will yield.
+const categoryCount = (cat) => {
+  const base =
+    activeStatus.value === 'ALL'
+      ? papers
+      : papers.filter(p => p.status === activeStatus.value)
+  return cat === 'ALL' ? base.length : base.filter(p => p.category === cat).length
+}
+
+const statusCount = (s) => {
+  const base =
+    activeCategory.value === 'ALL'
+      ? papers
+      : papers.filter(p => p.category === activeCategory.value)
+  return s === 'ALL' ? base.length : base.filter(p => p.status === s).length
 }
 </script>
 
@@ -90,25 +75,97 @@ const counts = {
       </div>
     </header>
 
-    <ul class="papers" role="list">
+    <!-- Category filter -->
+    <nav class="filter" aria-label="Filter by category">
+      <span class="kicker filter-label">CATEGORY /</span>
+      <div class="chips" role="tablist">
+        <button
+          v-for="cat in categories"
+          :key="cat"
+          type="button"
+          class="chip"
+          role="tab"
+          :aria-selected="activeCategory === cat"
+          :class="{ 'is-active': activeCategory === cat }"
+          @click="activeCategory = cat"
+        >
+          <span>{{ cat }}</span>
+          <span class="chip-count">{{ categoryCount(cat) }}</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Status filter -->
+    <nav class="filter filter-status" aria-label="Filter by status">
+      <span class="kicker filter-label">STATUS /</span>
+      <div class="chips" role="tablist">
+        <button
+          type="button"
+          class="chip"
+          role="tab"
+          :aria-selected="activeStatus === 'ALL'"
+          :class="{ 'is-active': activeStatus === 'ALL' }"
+          @click="activeStatus = 'ALL'"
+        >
+          <span>ALL</span>
+          <span class="chip-count">{{ statusCount('ALL') }}</span>
+        </button>
+        <button
+          v-for="s in statusOrder"
+          :key="s"
+          type="button"
+          class="chip"
+          :data-status="s"
+          role="tab"
+          :aria-selected="activeStatus === s"
+          :class="{ 'is-active': activeStatus === s }"
+          @click="activeStatus = s"
+        >
+          <span class="chip-dot" :class="s"></span>
+          <span>{{ statusLabel[s] }}</span>
+          <span class="chip-count">{{ statusCount(s) }}</span>
+        </button>
+      </div>
+    </nav>
+
+    <ul v-if="filtered.length" class="papers" role="list">
       <li
-        v-for="p in papers"
+        v-for="p in filtered"
         :key="p.title"
         class="paper"
         :data-status="p.status"
       >
         <div class="paper-meta">
           <span class="dot" :class="p.status"></span>
+          <span class="tag tag--ghost cat-tag">{{ p.category }}</span>
           <span class="label-meta">{{ p.venue }}</span>
           <span class="sep">·</span>
           <span class="label-meta">{{ p.area }}</span>
           <span class="sep">·</span>
           <span class="label-meta status-tag">{{ statusLabel[p.status] }}</span>
         </div>
-        <h2 class="paper-title">{{ p.title }}</h2>
+        <h2 class="paper-title">
+          <a
+            v-if="p.url"
+            class="paper-link"
+            :href="p.url"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ p.title }}<span class="link-arrow" aria-hidden="true">↗</span>
+          </a>
+          <template v-else>{{ p.title }}</template>
+        </h2>
         <p class="paper-take">{{ p.takeaway }}</p>
       </li>
     </ul>
+
+    <p v-else class="empty">
+      <span class="label-meta">
+        NO PAPERS UNDER “{{ activeCategory }}” /
+        “{{ activeStatus === 'ALL' ? 'ALL' : statusLabel[activeStatus] }}” YET — 这个组合还没有论文。
+      </span>
+    </p>
   </article>
 </template>
 
@@ -152,6 +209,109 @@ const counts = {
   border: 1px solid var(--text-meta);
 }
 
+/* ---- Filter rows ---- */
+.filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--hairline-dim);
+}
+.filter:first-of-type {
+  margin-top: clamp(1.4rem, 2vw, 2rem);
+}
+.filter-status {
+  margin-top: 0.7rem;
+}
+.filter-label {
+  color: var(--uv);
+}
+.filter-status .filter-label {
+  color: var(--mint);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.chip {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  padding: 0.45rem 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+.chip:hover {
+  color: var(--mint);
+  border-color: var(--mint);
+}
+.chip:focus-visible {
+  outline: 2px solid var(--focus-cyan);
+  outline-offset: 2px;
+}
+.chip.is-active {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: var(--black);
+}
+.chip[data-status='reading'].is-active {
+  background: var(--tile-yellow);
+  border-color: var(--tile-yellow);
+  color: var(--black);
+}
+.chip[data-status='queued'].is-active {
+  background: transparent;
+  border-color: var(--text);
+  color: var(--text);
+}
+.chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.chip-dot.read { background: var(--mint); }
+.chip-dot.reading { background: var(--tile-yellow); }
+.chip-dot.queued {
+  background: var(--canvas);
+  border: 1px solid var(--text-meta);
+}
+.chip.is-active .chip-dot.queued { border-color: var(--black); }
+.chip-count {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 0.05rem 0.4rem;
+  border-radius: 12px;
+  background: var(--canvas);
+  color: var(--text-meta);
+  border: 1px solid var(--hairline-dim);
+  min-width: 1.4rem;
+  text-align: center;
+}
+.chip.is-active .chip-count {
+  background: var(--black);
+  color: var(--mint);
+  border-color: var(--black);
+}
+.chip[data-status='reading'].is-active .chip-count {
+  color: var(--tile-yellow);
+}
+
+/* ---- Papers list ---- */
 .papers {
   list-style: none;
   padding: 0;
@@ -182,6 +342,10 @@ const counts = {
   gap: 0.55rem;
   margin-bottom: 0.55rem;
 }
+.cat-tag {
+  border-color: var(--mint);
+  color: var(--mint);
+}
 .sep {
   color: var(--text-meta);
   opacity: 0.5;
@@ -200,13 +364,46 @@ const counts = {
   line-height: 1.35;
   letter-spacing: -0.005em;
   color: var(--text);
-  transition: color var(--dur) var(--ease);
 }
-.paper:hover .paper-title { color: var(--hover-blue); }
+.paper-link {
+  color: inherit;
+  text-decoration: none;
+  display: inline;
+  transition: color var(--dur) var(--ease);
+  border-bottom: 1px solid transparent;
+}
+.paper-link:hover {
+  color: var(--hover-blue);
+  border-bottom-color: var(--hover-blue);
+}
+.paper-link:focus-visible {
+  outline: 2px solid var(--focus-cyan);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.link-arrow {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.85em;
+  color: var(--mint);
+  transition: transform var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.paper-link:hover .link-arrow {
+  transform: translate(2px, -2px);
+  color: var(--hover-blue);
+}
 .paper-take {
   margin: 0;
   color: var(--text-muted);
   line-height: 1.6;
   max-width: 70ch;
+}
+
+.empty {
+  margin: 3rem 0;
+  text-align: center;
+  padding: 2rem;
+  border: 1px dashed var(--hairline-dim);
+  border-radius: 20px;
 }
 </style>
