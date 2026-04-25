@@ -2,12 +2,13 @@
 import { computed } from 'vue'
 import { useLocale } from '../composables/useLocale'
 import type { Locale } from '../composables/useLocale'
+import { projects } from '../data/projects'
+import type { Localized } from '../data/projects'
+import { openSourceProjects } from '../data/openSourceProjects'
 import LocaleToggle from '../components/LocaleToggle.vue'
 import GithubGrid from '../components/GithubGrid.vue'
 
 const { locale } = useLocale()
-
-type Localized<T> = Record<Locale, T>
 
 interface Experience {
   time: string
@@ -39,6 +40,8 @@ const i18n = {
     experienceTitle: '经历日志',
     awardsKicker: '获奖',
     awardsTitle: '竞赛获奖',
+    openSourceKicker: '开源',
+    openSourceTitle: '参与的有趣开源项目',
     workKicker: '代表项目',
     workTitle: '项目'
   },
@@ -51,6 +54,8 @@ const i18n = {
     experienceTitle: 'FIELD.LOG',
     awardsKicker: 'AWARDS',
     awardsTitle: 'COMPETITION.LOG',
+    openSourceKicker: 'OPEN SOURCE',
+    openSourceTitle: 'INTERESTING PROJECTS',
     workKicker: 'SELECTED WORK',
     workTitle: 'PROJECTS'
   }
@@ -63,6 +68,8 @@ const i18n = {
   experienceTitle: string
   awardsKicker: string
   awardsTitle: string
+  openSourceKicker: string
+  openSourceTitle: string
   workKicker: string
   workTitle: string
 }>
@@ -125,97 +132,6 @@ const experiences: Experience[] = [
       ]
     },
     tags: ['RDMA', 'DISTRIBUTED FS', 'LLM SYSTEMS']
-  }
-]
-
-const projects = [
-  {
-    fill: 'mint',
-    name: 'SIEVEKV',
-    kicker: { zh: '2026.03 · ICIC 2026 · 独立一作', en: '2026.03 · ICIC 2026 · SOLE FIRST AUTHOR' },
-    summary: {
-      zh: '面向长上下文推理的语义感知 KV Cache 驱逐策略。融合注意力质量、头熵、信息密度、查询相关度与事实似然五维信号。',
-      en: 'Semantic-aware KV cache eviction for long-context inference. Fuses five lightweight signals: attention quality, head entropy, information density, query relevance, and factual likelihood.'
-    },
-    bullets: {
-      zh: [
-        'b=20% 预算下达到 70% 准确率，超过 SnapKV 40pp',
-        '32K tokens 上下文仍维持 90% 准确率',
-        '系统开销 8.86 ms/步，占解码时间 <4%'
-      ],
-      en: [
-        '70% accuracy at b=20% budget, +40pp over SnapKV',
-        '90% accuracy preserved at 32K-token context',
-        '8.86 ms/step overhead, <4% of decode time'
-      ]
-    },
-    stack: ['PYTHON', 'PYTORCH', 'QWEN2.5', 'LLAMA-3.2']
-  },
-  {
-    fill: 'uv',
-    name: 'FUSED CUDA KERNEL for PAGED KV CACHE',
-    kicker: { zh: '2025 · 个人项目', en: '2025 · INDEPENDENT PROJECT' },
-    summary: {
-      zh: '面向长上下文 LLM decode 的 paged attention kernel：把“两阶段 gather + attention”重构为 fused kernel。',
-      en: 'Paged attention kernel for long-context LLM decoding, fusing the two-stage gather + attention path into a single CUDA kernel.'
-    },
-    bullets: {
-      zh: [
-        '相较 PyTorch 基线 2.0-2.7x 加速',
-        'Nsight 实测显存吞吐 331 GB/s，约 94% 理论峰值',
-        'FP16 KV cache：2x 显存节省，最高 1.71x 加速'
-      ],
-      en: [
-        '2.0-2.7x speedup over PyTorch baseline',
-        '331 GB/s memory throughput, about 94% of peak on Nsight',
-        'FP16 KV cache: 2x memory saved, up to 1.71x faster'
-      ]
-    },
-    stack: ['CUDA C++', 'PYTORCH', 'NSIGHT']
-  },
-  {
-    fill: 'yellow',
-    name: 'LICore',
-    kicker: { zh: '持续迭代 · 个人系统项目', en: 'IN PROGRESS · PERSONAL SYSTEMS PROJECT' },
-    summary: {
-      zh: '基于 Rust 从零实现面向 RISC-V64 的 POSIX 兼容单体内核。覆盖内存管理、进程、系统调用与文件系统路径。',
-      en: 'A POSIX-compatible monolithic kernel for RISC-V64, written from scratch in Rust, covering memory management, processes, syscalls, and filesystem paths.'
-    },
-    bullets: {
-      zh: [
-        'Safe / Unsafe 分层架构，核心模块约束 unsafe 边界',
-        'Buddy 分配器、Sv39 三级页表、VmSpace 抽象',
-        'VirtIO-blk 驱动 + Ext4 只读文件系统'
-      ],
-      en: [
-        'Layered safe/unsafe architecture with constrained unsafe boundaries',
-        'Buddy allocator, Sv39 three-level paging, VmSpace abstraction',
-        'VirtIO-blk driver + read-only Ext4 filesystem'
-      ]
-    },
-    stack: ['RUST', 'RISC-V', 'NO_STD']
-  },
-  {
-    fill: 'white',
-    name: { zh: '分布式语义检索系统', en: 'DISTRIBUTED SEMANTIC RETRIEVAL' },
-    kicker: { zh: '2026 · 云计算课程项目', en: '2026 · CLOUD COMPUTING COURSE' },
-    summary: {
-      zh: '以 Chord DHT 为底座，基于 sentence-transformers 构建分布式稠密向量索引；Scatter-Gather 协议完成跨节点 top-k 聚合。',
-      en: 'Distributed dense-vector index over a Chord DHT with sentence-transformers; Scatter-Gather protocol delivers cross-node top-k aggregation.'
-    },
-    bullets: {
-      zh: [
-        '完整 RAG 管线：嵌入、分片、检索、Prompt、LLM',
-        'successor list 容错 + 键值副本策略',
-        '82 个单元/集成测试'
-      ],
-      en: [
-        'Full RAG pipeline: embed, shard, retrieve, prompt, LLM',
-        'Successor-list fault tolerance + key-value replication',
-        '82 unit + integration tests'
-      ]
-    },
-    stack: ['PYTHON', 'THRIFT RPC', 'CHORD DHT']
   }
 ]
 
@@ -386,6 +302,51 @@ const arr = <T,>(val: T[] | Localized<T[]>) => (Array.isArray(val) ? val : val[l
           </ul>
           <div class="award-tags">
             <span v-for="tag in award.tags" :key="tag" class="tag tag--ghost">{{ tag }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <hr class="rule" />
+
+    <section>
+      <div class="section-head">
+        <span class="kicker kicker-uv">{{ tt.openSourceKicker }}</span>
+        <h2 class="display display-lg">{{ tt.openSourceTitle }}</h2>
+      </div>
+      <div class="oss-grid">
+        <article
+          v-for="project in openSourceProjects"
+          :key="project.name"
+          class="oss-card"
+          :data-fill="project.fill"
+        >
+          <div class="oss-head">
+            <span class="kicker tile-kicker">{{ pick(project.role) }}</span>
+            <a
+              v-if="project.url"
+              class="oss-link label-meta"
+              :href="project.url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GITHUB
+            </a>
+          </div>
+          <h3 class="oss-title">
+            <a
+              v-if="project.url"
+              :href="project.url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ project.name }}
+            </a>
+            <template v-else>{{ project.name }}</template>
+          </h3>
+          <p class="oss-summary">{{ pick(project.summary) }}</p>
+          <div class="oss-tags">
+            <span v-for="tag in project.tags" :key="tag" class="tag tag--ghost">{{ tag }}</span>
           </div>
         </article>
       </div>
@@ -799,6 +760,97 @@ const arr = <T,>(val: T[] | Localized<T[]>) => (Array.isArray(val) ? val : val[l
   color: rgba(0, 0, 0, 0.78);
 }
 .award-card[data-fill='yellow'] .tag--ghost {
+  border-color: var(--black);
+  color: var(--black);
+}
+
+.oss-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+.oss-card {
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  padding: 1.45rem 1.55rem 1.5rem;
+  background: var(--canvas);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 280px;
+  transition: border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.oss-card:hover {
+  border-color: var(--mint);
+}
+.oss-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.oss-link {
+  color: var(--text-meta);
+}
+.oss-link:hover {
+  color: var(--hover-blue);
+}
+.oss-title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1.35rem, 1rem + 1vw, 2rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--text);
+  transition: color var(--dur) var(--ease);
+}
+.oss-title a {
+  color: inherit;
+}
+.oss-card:hover .oss-title {
+  color: var(--hover-blue);
+}
+.oss-summary {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 62ch;
+}
+.oss-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: auto;
+}
+.oss-card[data-fill='uv'] {
+  background: var(--tile-uv);
+  border-color: var(--uv-rule);
+  color: var(--white);
+}
+.oss-card[data-fill='uv'] .kicker {
+  color: var(--mint);
+}
+.oss-card[data-fill='uv'] .oss-summary {
+  color: rgba(255, 255, 255, 0.86);
+}
+.oss-card[data-fill='yellow'] {
+  background: var(--tile-yellow);
+  border-color: #b39800;
+  color: var(--black);
+}
+.oss-card[data-fill='yellow'] .kicker,
+.oss-card[data-fill='yellow'] .oss-link {
+  color: var(--uv);
+}
+.oss-card[data-fill='yellow'] .oss-title {
+  color: var(--black);
+}
+.oss-card[data-fill='yellow'] .oss-summary {
+  color: rgba(0, 0, 0, 0.78);
+}
+.oss-card[data-fill='yellow'] .tag--ghost {
   border-color: var(--black);
   color: var(--black);
 }
