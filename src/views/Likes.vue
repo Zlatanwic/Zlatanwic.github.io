@@ -2,7 +2,7 @@
 const football = {
   club: 'MAN. CITY',
   since: '忠实球迷',
-  note: '最爱的不是某场胜利，是这支球队踢球的方式——无球状态下的位置感，比有球时更让人着迷。',
+  note: '最爱的不是某场胜利，是这支球队踢球的方式——攻势足球的美丽，永远控制比赛。',
   players: ['DE BRUYNE', 'RODRI', 'FODEN']
 }
 
@@ -16,7 +16,7 @@ const games = [
 const others = [
   { label: '阅读', items: ['长稿非虚构', '系统类教科书', '少量科幻'] },
   { label: '音乐', items: ['POST-ROCK', 'LO-FI', '电影原声'] },
-  { label: '近期想做', items: ['多写短文', 'NovaOS 跑出 shell', '看完 Mamba & Ring Attention'] }
+  { label: '近期想做', items: ['入门dl compiler', '继续学习算子优化', '看完 Mamba & Ring Attention'] }
 ]
 </script>
 
