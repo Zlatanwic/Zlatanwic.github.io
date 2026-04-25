@@ -5,6 +5,9 @@ on:
     branches:
       - main
   workflow_dispatch:
+  schedule:
+    # Runs daily at 02:00 Beijing time (18:00 UTC) to refresh GitHub contribution data.
+    - cron: '0 18 * * *'
 
 permissions:
   contents: read
