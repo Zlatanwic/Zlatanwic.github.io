@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useLocale } from '../composables/useLocale.js'
 import LocaleToggle from '../components/LocaleToggle.vue'
+import GithubGrid from '../components/GithubGrid.vue'
 
 const { locale } = useLocale()
 
@@ -187,6 +188,10 @@ const arr = (val) => (Array.isArray(val) ? val : val[locale.value])
         </article>
       </div>
     </section>
+
+    <hr class="rule" />
+
+    <GithubGrid :locale="locale" />
   </article>
 </template>
 
