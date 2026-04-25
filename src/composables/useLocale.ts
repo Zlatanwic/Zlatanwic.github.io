@@ -1,5 +1,7 @@
 import { ref, watch } from 'vue'
 
+export type Locale = 'zh' | 'en'
+
 const STORAGE_KEY = 'rodebiau:locale'
 const initial =
   (typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_KEY)) ||
@@ -7,7 +9,7 @@ const initial =
     ? 'zh'
     : 'en')
 
-export const locale = ref(initial === 'zh' ? 'zh' : 'en')
+export const locale = ref<Locale>(initial === 'zh' ? 'zh' : 'en')
 
 if (typeof window !== 'undefined') {
   watch(locale, v => {
@@ -20,6 +22,9 @@ export function useLocale() {
   const toggle = () => {
     locale.value = locale.value === 'zh' ? 'en' : 'zh'
   }
-  const t = obj => (obj && obj[locale.value] != null ? obj[locale.value] : obj)
+  const t = <T>(obj: Record<Locale, T> | T) =>
+    obj && typeof obj === 'object' && locale.value in obj
+      ? (obj as Record<Locale, T>)[locale.value]
+      : obj
   return { locale, toggle, t }
 }

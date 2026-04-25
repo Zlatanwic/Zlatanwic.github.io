@@ -1,6 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
-import { papers, statusLabel, statusOrder } from '../data/papers.js'
+import { papers, statusLabel, statusOrder } from '../data/papers'
+import type { Paper, PaperStatus } from '../data/papers'
+
+type FilterStatus = 'ALL' | PaperStatus
 
 const counts = {
   read: papers.filter(p => p.status === 'read').length,
@@ -15,11 +18,11 @@ const categories = computed(() => {
 })
 
 const activeCategory = ref('ALL')
-const activeStatus = ref('ALL') // 'ALL' | 'read' | 'reading' | 'queued'
+const activeStatus = ref<FilterStatus>('ALL')
 
 // Two-stage filter: category narrows, then status narrows further.
 const filtered = computed(() => {
-  let list = papers
+  let list: Paper[] = papers
   if (activeCategory.value !== 'ALL') {
     list = list.filter(p => p.category === activeCategory.value)
   }
@@ -30,7 +33,7 @@ const filtered = computed(() => {
 })
 
 // Counts aware of the OTHER filter, so chips reflect what clicking will yield.
-const categoryCount = (cat) => {
+const categoryCount = (cat: string) => {
   const base =
     activeStatus.value === 'ALL'
       ? papers
@@ -38,7 +41,7 @@ const categoryCount = (cat) => {
   return cat === 'ALL' ? base.length : base.filter(p => p.category === cat).length
 }
 
-const statusCount = (s) => {
+const statusCount = (s: FilterStatus) => {
   const base =
     activeCategory.value === 'ALL'
       ? papers

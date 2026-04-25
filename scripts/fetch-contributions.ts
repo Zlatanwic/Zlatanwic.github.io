@@ -4,7 +4,7 @@
  * Uses GitHub GraphQL API to get the real contributionCalendar
  * (the same data that powers the profile graph).
  *
- * Run with: GITHUB_TOKEN=ghp_xxx node scripts/fetch-contributions.js
+ * Run with: GITHUB_TOKEN=ghp_xxx pnpm exec tsx scripts/fetch-contributions.ts
  * Output: public/github-contributions.json
  */
 
@@ -37,7 +37,33 @@ query($login: String!) {
 }
 `
 
-function graphQL() {
+interface GraphQLContributionDay {
+  contributionCount: number
+  date: string
+  weekday: number
+}
+
+interface GraphQLContributionCalendar {
+  totalContributions: number
+  weeks: Array<{
+    contributionDays: GraphQLContributionDay[]
+  }>
+}
+
+interface GraphQLData {
+  user?: {
+    contributionsCollection?: {
+      contributionCalendar?: GraphQLContributionCalendar
+    }
+  }
+}
+
+interface GraphQLResponse {
+  data?: GraphQLData
+  errors?: Array<{ message: string }>
+}
+
+function graphQL(): Promise<GraphQLData | undefined> {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({ query: QUERY, variables: { login: USERNAME } })
     const req = https.request(
@@ -57,9 +83,9 @@ function graphQL() {
         res.on('data', chunk => { data += chunk })
         res.on('end', () => {
           try {
-            const json = JSON.parse(data)
+            const json = JSON.parse(data) as GraphQLResponse
             if (json.errors) {
-              reject(new Error(json.errors.map(e => e.message).join('; ')))
+              reject(new Error(json.errors.map((e) => e.message).join('; ')))
             } else {
               resolve(json.data)
             }
@@ -101,7 +127,8 @@ async function main() {
     fs.writeFileSync(OUT, JSON.stringify(payload, null, 2))
     console.log(`[fetch-contributions] Wrote ${calendar.totalContributions} contributions to ${OUT}`)
   } catch (err) {
-    console.error('[fetch-contributions] Failed:', err.message)
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[fetch-contributions] Failed:', message)
     process.exit(1)
   }
 }

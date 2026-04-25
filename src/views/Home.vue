@@ -1,10 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
-import { useLocale } from '../composables/useLocale.js'
+import { useLocale } from '../composables/useLocale'
+import type { Locale } from '../composables/useLocale'
 import LocaleToggle from '../components/LocaleToggle.vue'
 import GithubGrid from '../components/GithubGrid.vue'
 
 const { locale } = useLocale()
+
+type Localized<T> = Record<Locale, T>
 
 const i18n = {
   zh: {
@@ -35,7 +38,16 @@ const i18n = {
     workKicker: 'SELECTED WORK',
     workTitle: 'PROJECTS'
   }
-}
+} satisfies Record<Locale, {
+  affil: string
+  name: string
+  pull: string
+  tagline: string
+  nowKicker: string
+  now: Array<{ strong: string; body: string }>
+  workKicker: string
+  workTitle: string
+}>
 
 const projects = [
   {
@@ -129,8 +141,11 @@ const projects = [
 ]
 
 const tt = computed(() => i18n[locale.value])
-const pick = (val) => (val && typeof val === 'object' && !Array.isArray(val) ? val[locale.value] : val)
-const arr = (val) => (Array.isArray(val) ? val : val[locale.value])
+const pick = <T,>(val: Localized<T> | T) =>
+  val && typeof val === 'object' && !Array.isArray(val) && locale.value in val
+    ? (val as Localized<T>)[locale.value]
+    : val
+const arr = <T,>(val: T[] | Localized<T[]>) => (Array.isArray(val) ? val : val[locale.value])
 </script>
 
 <template>

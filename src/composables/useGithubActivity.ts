@@ -4,21 +4,48 @@ const username = 'Zlatanwic'
 const EVENTS_CACHE_KEY = 'rodebiau:github-events'
 const EVENTS_CACHE_TTL = 1000 * 60 * 30 // 30 min
 
-const rawEvents = ref([])
-const staticData = ref(null) // Build-time contribution data
+interface GithubEvent {
+  created_at: string
+}
+
+export interface ContributionDay {
+  date: string
+  count: number
+  level: number
+  isFuture: boolean
+  weekday?: number
+}
+
+interface StaticContributionDay {
+  contributionCount: number
+  date: string
+  weekday: number
+}
+
+interface StaticContributionWeek {
+  contributionDays: StaticContributionDay[]
+}
+
+interface StaticContributionData {
+  totalContributions: number
+  weeks: StaticContributionWeek[]
+}
+
+const rawEvents = ref<GithubEvent[]>([])
+const staticData = ref<StaticContributionData | null>(null) // Build-time contribution data
 const loading = ref(false)
-const error = ref(null)
+const error = ref<string | null>(null)
 const hasRealData = ref(false)
 
-function isoDate(d) {
+function isoDate(d: Date) {
   return d.toISOString().slice(0, 10)
 }
 
-function readCache() {
+function readCache(): GithubEvent[] | null {
   try {
     const raw = localStorage.getItem(EVENTS_CACHE_KEY)
     if (!raw) return null
-    const parsed = JSON.parse(raw)
+    const parsed = JSON.parse(raw) as { ts: number; data: GithubEvent[] }
     if (Date.now() - parsed.ts > EVENTS_CACHE_TTL) return null
     return parsed.data
   } catch {
@@ -26,25 +53,25 @@ function readCache() {
   }
 }
 
-function writeCache(data) {
+function writeCache(data: GithubEvent[]) {
   try {
     localStorage.setItem(EVENTS_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }))
   } catch { /* ignore */ }
 }
 
-async function fetchEvents(page = 1) {
+async function fetchEvents(page = 1): Promise<GithubEvent[]> {
   const res = await fetch(
     `https://api.github.com/users/${username}/events/public?per_page=100&page=${page}`
   )
   if (!res.ok) throw new Error(`GitHub API ${res.status}`)
-  return res.json()
+  return res.json() as Promise<GithubEvent[]>
 }
 
 async function loadStatic() {
   try {
     const res = await fetch('/github-contributions.json')
     if (!res.ok) return false
-    const json = await res.json()
+    const json = await res.json() as StaticContributionData
     if (!json.weeks) return false
     staticData.value = json
     hasRealData.value = true
@@ -66,7 +93,7 @@ async function loadEvents() {
   }
 
   try {
-    const all = []
+    const all: GithubEvent[] = []
     for (let page = 1; page <= 3; page++) {
       const batch = await fetchEvents(page)
       if (!batch.length) break
@@ -76,7 +103,7 @@ async function loadEvents() {
     rawEvents.value = all
     writeCache(all)
   } catch (e) {
-    error.value = e.message || 'Failed to load GitHub activity'
+    error.value = e instanceof Error ? e.message : 'Failed to load GitHub activity'
   } finally {
     loading.value = false
   }
@@ -91,7 +118,7 @@ export function useGithubActivity() {
   // ---------- Real contribution data (build-time GraphQL) ----------
   const contributionDays = computed(() => {
     if (!staticData.value?.weeks) return []
-    const days = []
+    const days: ContributionDay[] = []
     for (const week of staticData.value.weeks) {
       for (const day of week.contributionDays) {
         const count = day.contributionCount
@@ -144,7 +171,7 @@ export function useGithubActivity() {
 
   // ---------- Fallback: Events API ----------
   const eventDays = computed(() => {
-    const counts = new Map()
+    const counts = new Map<string, number>()
     rawEvents.value.forEach(ev => {
       const d = isoDate(new Date(ev.created_at))
       counts.set(d, (counts.get(d) || 0) + 1)
@@ -161,7 +188,7 @@ export function useGithubActivity() {
     const start = new Date(firstDate)
     start.setDate(firstDate.getDate() - startOffset)
 
-    const list = []
+    const list: ContributionDay[] = []
     const msPerDay = 86400000
     for (let t = start.getTime(); t <= today.getTime(); t += msPerDay) {
       const d = new Date(t)

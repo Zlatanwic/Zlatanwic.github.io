@@ -1,5 +1,5 @@
-<script setup>
-import { useLocale } from '../composables/useLocale.js'
+<script setup lang="ts">
+import { useLocale } from '../composables/useLocale'
 const { locale, toggle } = useLocale()
 </script>
 

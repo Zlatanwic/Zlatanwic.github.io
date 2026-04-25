@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 const football = {
   club: 'MAN. CITY',
   since: '忠实球迷',

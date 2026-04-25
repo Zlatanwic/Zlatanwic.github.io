@@ -1,9 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
-import { useGithubActivity } from '../composables/useGithubActivity.js'
+import { useGithubActivity } from '../composables/useGithubActivity'
+import type { Locale } from '../composables/useLocale'
 
-const props = defineProps({
-  locale: { type: String, default: 'zh' }
+const props = withDefaults(defineProps<{ locale?: Locale }>(), {
+  locale: 'zh'
 })
 
 const { weeks, loading, error, stats, hasRealData } = useGithubActivity()
@@ -37,7 +38,7 @@ const t = computed(() => i18n.value[props.locale] ?? i18n.value.en)
 // Month labels aligned to week columns
 const monthLabels = computed(() => {
   const seen = new Set()
-  const labels = []
+  const labels: Array<{ week: number; text: string }> = []
   weeks.value.forEach((week, wi) => {
     const first = week[0]
     if (!first || first.isFuture) return

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 const posts = [
   {
     time: '2026 · 03 · 24',

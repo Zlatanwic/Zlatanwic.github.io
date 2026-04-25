@@ -13,7 +13,19 @@
  * Adding a new category: just type a new value in `category`. The chip bar
  * derives the list automatically.
  */
-export const papers = [
+export type PaperStatus = 'read' | 'reading' | 'queued'
+
+export interface Paper {
+  title: string
+  url?: string
+  venue: string
+  category: string
+  area: string
+  status: PaperStatus
+  takeaway: string
+}
+
+export const papers: Paper[] = [
   {
     title: 'SnapKV: LLM Knows What You are Looking for Before Generation',
     url: 'https://arxiv.org/abs/2404.14469',
@@ -76,10 +88,10 @@ export const papers = [
   }
 ]
 
-export const statusLabel = {
+export const statusLabel: Record<PaperStatus, string> = {
   read: '已读',
   reading: '在读',
   queued: '待读'
 }
 
-export const statusOrder = ['read', 'reading', 'queued']
+export const statusOrder: PaperStatus[] = ['read', 'reading', 'queued']
