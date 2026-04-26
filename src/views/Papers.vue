@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { papers, statusLabel, statusOrder } from '../data/papers'
-import type { Paper, PaperStatus } from '../data/papers'
+import { categoryOrder, papers, statusLabel, statusOrder } from '../data/papers'
+import type { Paper, PaperCategory, PaperStatus } from '../data/papers'
 
 type FilterStatus = 'ALL' | PaperStatus
+type FilterCategory = 'ALL' | PaperCategory
 
 const counts = {
   read: papers.filter(p => p.status === 'read').length,
@@ -11,13 +12,9 @@ const counts = {
   queued: papers.filter(p => p.status === 'queued').length
 }
 
-// Categories derived from data; "ALL" is always first.
-const categories = computed(() => {
-  const set = new Set(papers.map(p => p.category))
-  return ['ALL', ...Array.from(set)]
-})
+const categories: FilterCategory[] = ['ALL', ...categoryOrder]
 
-const activeCategory = ref('ALL')
+const activeCategory = ref<FilterCategory>('ALL')
 const activeStatus = ref<FilterStatus>('ALL')
 
 // Two-stage filter: category narrows, then status narrows further.
@@ -33,7 +30,7 @@ const filtered = computed(() => {
 })
 
 // Counts aware of the OTHER filter, so chips reflect what clicking will yield.
-const categoryCount = (cat: string) => {
+const categoryCount = (cat: FilterCategory) => {
   const base =
     activeStatus.value === 'ALL'
       ? papers

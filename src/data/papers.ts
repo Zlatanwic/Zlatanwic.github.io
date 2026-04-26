@@ -14,12 +14,20 @@
  * derives the list automatically.
  */
 export type PaperStatus = 'read' | 'reading' | 'queued'
+export type PaperCategory = 'INFERENCE' | 'DL COMPILER' | 'ARCHITECTURE' | 'ALGORITHM' | 'MISC'
+export const categoryOrder: PaperCategory[] = [
+  'INFERENCE',
+  'DL COMPILER',
+  'ARCHITECTURE',
+  'ALGORITHM',
+  'MISC'
+]
 
 export interface Paper {
   title: string
   url?: string
   venue: string
-  category: string
+  category: PaperCategory
   area?: string
   status: PaperStatus
   takeaway?: string
@@ -50,7 +58,7 @@ export const papers: Paper[] = [
     title: 'Efficient Memory Management for Large Language Model Serving with PagedAttention',
     url: 'https://arxiv.org/abs/2309.06180',
     venue: 'SOSP 2023',
-    category: 'SYSTEMS',
+    category: 'INFERENCE',
     area: 'LLM SERVING',
     status: 'read',
     takeaway:
@@ -60,7 +68,7 @@ export const papers: Paper[] = [
     title: 'FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning',
     url: 'https://arxiv.org/abs/2307.08691',
     venue: 'ARXIV 2023',
-    category: 'KERNEL',
+    category: 'ALGORITHM',
     area: 'ATTENTION KERNEL',
     status: 'read',
     takeaway:
@@ -80,7 +88,7 @@ export const papers: Paper[] = [
     title: 'Ring Attention with Blockwise Transformers for Near-Infinite Context',
     url: 'https://arxiv.org/abs/2310.01889',
     venue: 'ICLR 2024',
-    category: 'SYSTEMS',
+    category: 'ALGORITHM',
     area: 'DISTRIBUTED',
     status: 'queued',
     takeaway:

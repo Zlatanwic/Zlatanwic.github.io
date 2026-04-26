@@ -10,7 +10,7 @@ const games = [
   { name: 'GTA V', tag: 'OPEN WORLD', note: '反复回到 Los Santos——只为开车在公路上听电台。' },
   { name: 'CYBERPUNK 2077', tag: 'RPG', note: 'Phantom Liberty 之后，夜之城终于配得上它的故事。' },
   { name: 'RDR 2', tag: 'OPEN WORLD', note: '到现在仍然觉得它是叙事的天花板。' },
-  { name: 'ELDEN RING', tag: 'SOULSLIKE', note: '“看一眼地图，再决定今晚去哪死。”' }
+  { name: 'RESIDENT EVIL SERIES', tag: 'SURVIVAL HORROR', note: '从洋馆到浣熊市，最迷人的是资源紧张时那种冷静的求生感。' }
 ]
 
 const others = [

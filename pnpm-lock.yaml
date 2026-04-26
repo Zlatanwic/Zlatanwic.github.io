@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      ogl:
+        specifier: ^1.0.11
+        version: 1.0.11
       vue:
         specifier: ^3.5.13
         version: 3.5.33(typescript@6.0.3)
@@ -614,6 +617,9 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  ogl@1.0.11:
+    resolution: {integrity: sha512-kUpC154AFfxi16pmZUK4jk3J+8zxwTWGPo03EoYA8QPbzikHoaC82n6pNTbd+oEaJonaE8aPWBlX7ad9zrqLsA==}
+
   path-browserify@1.0.1:
     resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
 
@@ -1140,6 +1146,8 @@ snapshots:
   muggle-string@0.4.1: {}
 
   nanoid@3.3.11: {}
+
+  ogl@1.0.11: {}
 
   path-browserify@1.0.1: {}
 
