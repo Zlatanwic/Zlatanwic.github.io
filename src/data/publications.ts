@@ -15,7 +15,7 @@ export interface Publication {
 
 export const publications: Publication[] = [
   {
-    title: 'SIEVEKV',
+    title: 'SieveKV: A Semantics-Aware KV Cache Eviction Strategy for Long-Context Inference',
     venue: {
       zh: 'ICIC 2026',
       en: 'ICIC 2026'

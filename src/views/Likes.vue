@@ -19,19 +19,25 @@ const games = [
     name: 'CYBERPUNK 2077',
     tag: 'RPG',
     image: '/games/johnny.jpg',
-    note: 'Phantom Liberty 之后，夜之城终于配得上它的故事。'
+    note: '"Wake up, samurai. We have a city to burn."'
   },
   {
     name: 'RDR 2',
     tag: 'OPEN WORLD',
     image: '/games/ather.jpg',
-    note: '到现在仍然觉得它是叙事的天花板。'
+    note: '"我不常提起他，但我经常想念他。"'
   },
   {
     name: 'RESIDENT EVIL SERIES',
     tag: 'SURVIVAL HORROR',
     image: '/games/grace.jpg',
     note: '从洋馆到浣熊市，最迷人的是资源紧张时那种冷静的求生感。'
+  },
+  {
+    name: 'HITMAN SERIES',
+    tag: 'STEALTH',
+    image: '/games/hitman.jpg',
+    note: '最喜欢的是那种把地图摸透之后，一切都像精密装置一样咬合起来的潜入感。'
   }
 ]
 

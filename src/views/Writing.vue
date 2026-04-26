@@ -3,25 +3,28 @@ import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { labelPostCollection, posts } from '../data/posts'
 
+type WritingTab = 'paper-notes' | 'tech' | 'misc'
+
 const searchQuery = ref('')
-const activeCollection = ref('ALL')
+const activeTab = ref<WritingTab>('paper-notes')
 const activeCategory = ref('ALL')
 
-const collections = computed(() => [
-  'ALL',
-  ...Array.from(new Set(posts.map(post => post.collection)))
-])
+const tabs: { id: WritingTab; label: string; deck: string }[] = [
+  { id: 'paper-notes', label: 'PAPER NOTES', deck: 'reading notes' },
+  { id: 'tech', label: 'TECH', deck: 'technical blogs' },
+  { id: 'misc', label: 'MISC', deck: 'logs & essays' }
+]
+
+const postsInTab = (tab: WritingTab) =>
+  posts.filter(post => post.collection === tab)
 
 const categories = computed(() => [
   'ALL',
-  ...Array.from(new Set(posts.map(post => post.category)))
+  ...Array.from(new Set(postsInTab(activeTab.value).map(post => post.category)))
 ])
 
 const filteredPosts = computed(() => {
-  let list = posts
-  if (activeCollection.value !== 'ALL') {
-    list = list.filter(post => post.collection === activeCollection.value)
-  }
+  let list = postsInTab(activeTab.value)
 
   if (activeCategory.value !== 'ALL') {
     list = list.filter(post => post.category === activeCategory.value)
@@ -45,15 +48,17 @@ const filteredPosts = computed(() => {
   return list
 })
 
-const collectionCount = (collection: string) =>
-  collection === 'ALL'
-    ? posts.length
-    : posts.filter(post => post.collection === collection).length
+const switchTab = (tab: WritingTab) => {
+  activeTab.value = tab
+  activeCategory.value = 'ALL'
+}
+
+const tabCount = (tab: WritingTab) => postsInTab(tab).length
 
 const categoryCount = (category: string) =>
   category === 'ALL'
-    ? posts.length
-    : posts.filter(post => post.category === category).length
+    ? postsInTab(activeTab.value).length
+    : postsInTab(activeTab.value).filter(post => post.category === category).length
 </script>
 
 <template>
@@ -87,26 +92,24 @@ const categoryCount = (category: string) =>
       </button>
     </div>
 
-    <nav class="filter" aria-label="Filter writing by folder">
-      <span class="kicker filter-label">FOLDER /</span>
-      <div class="chips" role="tablist">
-        <button
-          v-for="collection in collections"
-          :key="collection"
-          type="button"
-          class="chip"
-          role="tab"
-          :aria-selected="activeCollection === collection"
-          :class="{ 'is-active': activeCollection === collection }"
-          @click="activeCollection = collection"
-        >
-          <span>{{ collection === 'ALL' ? 'ALL' : labelPostCollection(collection) }}</span>
-          <span class="chip-count">{{ collectionCount(collection) }}</span>
-        </button>
-      </div>
+    <nav class="tabs" aria-label="Switch writing type">
+      <button
+        v-for="tab in tabs"
+        :key="tab.id"
+        type="button"
+        class="tab"
+        role="tab"
+        :aria-selected="activeTab === tab.id"
+        :class="{ 'is-active': activeTab === tab.id }"
+        @click="switchTab(tab.id)"
+      >
+        <span class="tab-label">{{ tab.label }}</span>
+        <span class="tab-deck">{{ tab.deck }}</span>
+        <span class="tab-count">{{ tabCount(tab.id) }}</span>
+      </button>
     </nav>
 
-    <nav class="filter" aria-label="Filter writing by category">
+    <nav v-if="categories.length > 1" class="filter" aria-label="Filter writing by category">
       <span class="kicker filter-label">TAG /</span>
       <div class="chips" role="tablist">
         <button
@@ -157,6 +160,7 @@ const categoryCount = (category: string) =>
       <p v-else class="empty">
         <span class="label-meta">
           NO MATCHING DISPATCHES
+          / {{ tabs.find(tab => tab.id === activeTab)?.label }}
           <template v-if="searchQuery"> / “{{ searchQuery }}”</template>
           YET.
         </span>
@@ -233,6 +237,82 @@ const categoryCount = (category: string) =>
 .search-clear:hover {
   background: var(--uv);
   color: var(--white);
+}
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: clamp(1rem, 2vw, 1.5rem);
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--hairline-dim);
+}
+.tab {
+  min-width: 0;
+  min-height: 86px;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  gap: 0.35rem 0.75rem;
+  text-align: left;
+  transition: background var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.tab:hover {
+  border-color: var(--mint);
+  color: var(--text);
+}
+.tab.is-active {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: var(--black);
+}
+.tab-label {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 0.9rem + 0.9vw, 1.65rem);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.tab-deck {
+  grid-column: 1;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-meta);
+}
+.tab.is-active .tab-deck {
+  color: rgba(0, 0, 0, 0.68);
+}
+.tab-count {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  min-width: 2rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--hairline-dim);
+  border-radius: 999px;
+  background: var(--canvas);
+  color: var(--mint);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+}
+.tab.is-active .tab-count {
+  background: var(--black);
+  border-color: var(--black);
+  color: var(--mint);
 }
 .filter {
   display: flex;
@@ -445,6 +525,9 @@ const categoryCount = (category: string) =>
   .search-row {
     align-items: stretch;
     flex-direction: column;
+  }
+  .tabs {
+    grid-template-columns: 1fr;
   }
   .search-clear {
     align-self: flex-start;

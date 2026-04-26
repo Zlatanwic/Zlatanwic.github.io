@@ -5,6 +5,7 @@ export type Localized<T> = Record<Locale, T>
 export interface Project {
   fill: 'mint' | 'uv' | 'yellow' | 'white'
   name: Localized<string> | string
+  url?: string
   kicker: Localized<string>
   summary: Localized<string>
   bullets: Localized<string[]>
@@ -37,6 +38,7 @@ export const projects: Project[] = [
   {
     fill: 'uv',
     name: 'FUSED CUDA KERNEL for PAGED KV CACHE',
+    url: 'https://github.com/Zlatanwic/Fused-Kernel-for-Paged-attention',
     kicker: { zh: '2025 · 个人项目', en: '2025 · INDEPENDENT PROJECT' },
     summary: {
       zh: '面向长上下文 LLM decode 的 paged attention kernel：把“两阶段 gather + attention”重构为 fused kernel。',
@@ -81,6 +83,7 @@ export const projects: Project[] = [
   {
     fill: 'white',
     name: { zh: '分布式语义检索系统', en: 'DISTRIBUTED SEMANTIC RETRIEVAL' },
+    url: 'https://github.com/Zlatanwic/thriftic-chord',
     kicker: { zh: '2026 · 云计算课程项目', en: '2026 · CLOUD COMPUTING COURSE' },
     summary: {
       zh: '以 Chord DHT 为底座，基于 sentence-transformers 构建分布式稠密向量索引；Scatter-Gather 协议完成跨节点 top-k 聚合。',

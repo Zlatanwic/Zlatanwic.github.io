@@ -37,8 +37,8 @@ const i18n = {
     name: 'LI KUO',
     pull: '“ 在人工智能与计算机系统之间。”',
     tagline: 'MLSYS FULLSTACK · LLM INFERENCE · OS · DISTRIBUTED',
-    experienceKicker: '经历',
-    experienceTitle: '经历日志',
+    experienceKicker: 'experience',
+    experienceTitle: 'experience.log',
     awardsKicker: '获奖',
     awardsTitle: '竞赛获奖',
     openSourceKicker: '开源',
@@ -303,7 +303,17 @@ const isPdf = (path: string) => path.toLowerCase().endsWith('.pdf')
           :data-fill="p.fill"
         >
           <span class="kicker tile-kicker">{{ pick(p.kicker) }}</span>
-          <h3 class="tile-name display">{{ pick(p.name) }}</h3>
+          <h3 class="tile-name display">
+            <a
+              v-if="p.url"
+              :href="p.url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ pick(p.name) }}
+            </a>
+            <template v-else>{{ pick(p.name) }}</template>
+          </h3>
           <p class="tile-summary">{{ pick(p.summary) }}</p>
           <ul class="tile-bullets">
             <li v-for="b in arr(p.bullets)" :key="b">{{ b }}</li>
@@ -594,6 +604,12 @@ const isPdf = (path: string) => path.toLowerCase().endsWith('.pdf')
   font-size: clamp(1.7rem, 1.2rem + 1.2vw, 2.4rem);
   letter-spacing: 0.005em;
   line-height: 0.95;
+}
+.tile-name a {
+  color: inherit;
+}
+.tile:hover .tile-name a {
+  color: var(--hover-blue);
 }
 .tile-summary {
   margin: 0;

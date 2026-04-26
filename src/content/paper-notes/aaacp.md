@@ -45,3 +45,4 @@ LlamaIndex
 | RAG / Haystack      | Host         | Static  | Single-step |
 | ChemCrow            | LLM          | Dynamic | Multi-step  |
 | Web-Augmented Agent | Host         | Static  | Single-step |
+## profiling

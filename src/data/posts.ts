@@ -4,11 +4,9 @@ export type PostStatus = 'draft' | 'planned' | 'published'
 export type PostFill = 'dark' | 'mint' | 'uv' | 'yellow'
 
 export const postCollectionLabels: Record<string, string> = {
-  'project-logs': 'PROJECT LOGS',
   'paper-notes': 'PAPER NOTES',
   tech: 'TECH',
-  essays: 'ESSAYS',
-  pages: 'PAGES'
+  misc: 'MISC'
 }
 
 export interface Post {
