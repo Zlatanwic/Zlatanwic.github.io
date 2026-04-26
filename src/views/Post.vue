@@ -1,10 +1,45 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { findPost, labelPostCollection } from '../data/posts'
+import type { PostTocItem } from '../data/posts'
 
 const route = useRoute()
 const post = computed(() => findPost(String(route.params.slug)))
+
+interface TocGroup {
+  heading: PostTocItem
+  children: PostTocItem[]
+}
+
+const collapsedToc = ref<Set<string>>(new Set())
+
+const tocGroups = computed<TocGroup[]>(() => {
+  const groups: TocGroup[] = []
+
+  for (const item of post.value?.toc ?? []) {
+    if (item.level === 2 || !groups.length) {
+      groups.push({ heading: item, children: [] })
+      continue
+    }
+
+    groups[groups.length - 1].children.push(item)
+  }
+
+  return groups
+})
+
+const isCollapsed = (id: string) => collapsedToc.value.has(id)
+
+const toggleTocGroup = (id: string) => {
+  const next = new Set(collapsedToc.value)
+  if (next.has(id)) {
+    next.delete(id)
+  } else {
+    next.add(id)
+  }
+  collapsedToc.value = next
+}
 </script>
 
 <template>
@@ -22,7 +57,48 @@ const post = computed(() => findPost(String(route.params.slug)))
       <p v-if="post.deck" class="lede">{{ post.deck }}</p>
     </header>
 
-    <section class="post-body" v-html="post.html" />
+    <div class="post-layout">
+      <section class="post-body" v-html="post.html" />
+
+      <aside v-if="tocGroups.length" class="post-toc" aria-label="Article headings">
+        <span class="toc-kicker">ON THIS PAGE</span>
+        <nav class="toc-nav">
+          <div v-for="group in tocGroups" :key="group.heading.id" class="toc-group">
+            <div class="toc-row">
+              <a class="toc-link toc-link--h2" :href="`#${group.heading.id}`">
+                {{ group.heading.title }}
+              </a>
+              <button
+                v-if="group.children.length"
+                class="toc-toggle"
+                type="button"
+                :aria-label="`${isCollapsed(group.heading.id) ? 'Expand' : 'Collapse'} ${group.heading.title}`"
+                :aria-expanded="!isCollapsed(group.heading.id)"
+                @click="toggleTocGroup(group.heading.id)"
+              >
+                {{ isCollapsed(group.heading.id) ? '+' : '-' }}
+              </button>
+            </div>
+            <div
+              v-if="group.children.length"
+              class="toc-children-wrap"
+              :class="{ 'is-collapsed': isCollapsed(group.heading.id) }"
+            >
+              <div class="toc-children">
+                <a
+                  v-for="child in group.children"
+                  :key="child.id"
+                  class="toc-link toc-link--h3"
+                  :href="`#${child.id}`"
+                >
+                  {{ child.title }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </aside>
+    </div>
   </article>
 
   <article v-else class="post-missing">
@@ -35,7 +111,7 @@ const post = computed(() => findPost(String(route.params.slug)))
 <style scoped>
 .post-page,
 .post-missing {
-  max-width: 920px;
+  max-width: 1180px;
 }
 .back-link {
   display: inline-flex;
@@ -68,6 +144,12 @@ const post = computed(() => findPost(String(route.params.slug)))
   gap: 0.7rem;
   align-items: center;
 }
+.post-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 920px) minmax(190px, 240px);
+  gap: clamp(1.2rem, 3vw, 2.4rem);
+  align-items: start;
+}
 .post-body {
   position: relative;
   margin-top: clamp(1.8rem, 3vw, 3rem);
@@ -81,6 +163,110 @@ const post = computed(() => findPost(String(route.params.slug)))
   font-size: clamp(1rem, 0.98rem + 0.12vw, 1.08rem);
   line-height: 1.78;
   overflow: hidden;
+}
+.post-toc {
+  position: sticky;
+  top: 1.2rem;
+  margin-top: clamp(1.8rem, 3vw, 3rem);
+  padding: 1rem 0 1rem 1rem;
+  border-left: 1px solid var(--hairline-dim);
+  max-height: calc(100dvh - 2.4rem);
+  overflow: auto;
+}
+.toc-kicker {
+  display: block;
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mint);
+}
+.toc-nav {
+  display: grid;
+  gap: 0.65rem;
+}
+.toc-group {
+  display: grid;
+  gap: 0.4rem;
+}
+.toc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.55rem;
+}
+.toc-link {
+  display: block;
+  padding: 0.26rem 0;
+  color: var(--text-meta);
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid transparent;
+  transition: color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+.toc-link:hover {
+  color: var(--mint);
+  border-bottom-color: var(--mint);
+  transform: translateX(2px);
+}
+.toc-link--h2 {
+  color: var(--text-muted);
+}
+.toc-link--h3 {
+  padding-left: 0.95rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.toc-children-wrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+  transition: grid-template-rows 240ms var(--ease),
+    opacity 180ms var(--ease),
+    transform 240ms var(--ease);
+}
+.toc-children-wrap.is-collapsed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+.toc-children {
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  gap: 0.18rem;
+  border-left: 1px dashed var(--hairline-dim);
+  margin-left: 0.2rem;
+}
+.toc-toggle {
+  width: 1.55rem;
+  height: 1.55rem;
+  border: 1px solid var(--hairline-dim);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mint);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.toc-toggle:hover {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: var(--black);
 }
 .post-body::before {
   content: '';
@@ -220,6 +406,36 @@ const post = computed(() => findPost(String(route.params.slug)))
   border-radius: 6px;
   padding: 0.1rem 0.35rem;
 }
+.post-body :deep(.katex) {
+  color: var(--text);
+  font-size: 1.04em;
+}
+.post-body :deep(.math-block) {
+  margin: 1.4rem 0;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--hairline-dim);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  max-width: 100%;
+}
+.post-body :deep(.math-block .katex-display) {
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: center;
+}
+.post-body :deep(.math-block .katex-display > .katex) {
+  display: inline-block;
+  min-width: max-content;
+}
+.post-body :deep(.katex-error) {
+  color: var(--tile-pink);
+}
 .post-body :deep(pre) {
   overflow-x: auto;
   margin: 1.35rem 0;
@@ -284,6 +500,21 @@ const post = computed(() => findPost(String(route.params.slug)))
 }
 
 @media (max-width: 720px) {
+  .post-layout {
+    grid-template-columns: 1fr;
+  }
+  .post-toc {
+    position: static;
+    order: -1;
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--hairline-dim);
+    border-radius: 18px;
+    max-height: none;
+  }
+  .toc-nav {
+    grid-template-columns: 1fr;
+  }
   .post-body {
     margin-left: -0.25rem;
     margin-right: -0.25rem;

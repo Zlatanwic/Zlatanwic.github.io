@@ -55,6 +55,10 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   min-height: 100dvh;
 }

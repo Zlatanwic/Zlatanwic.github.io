@@ -1,7 +1,14 @@
 import MarkdownIt from 'markdown-it'
+import markdownItKatex from 'markdown-it-katex'
 
 export type PostStatus = 'draft' | 'planned' | 'published'
 export type PostFill = 'dark' | 'mint' | 'uv' | 'yellow'
+
+export interface PostTocItem {
+  id: string
+  level: 2 | 3
+  title: string
+}
 
 export const postCollectionLabels: Record<string, string> = {
   'paper-notes': 'PAPER NOTES',
@@ -19,6 +26,7 @@ export interface Post {
   status: PostStatus
   deck: string
   fill: PostFill
+  toc: PostTocItem[]
   html: string
 }
 
@@ -35,7 +43,29 @@ const md = new MarkdownIt({
   html: false,
   linkify: true,
   typographer: true
+}).use(markdownItKatex, {
+  throwOnError: false,
+  errorColor: '#ff4eb2'
 })
+
+const defaultHeadingOpen =
+  md.renderer.rules.heading_open ??
+  ((tokens, idx, options, _env, self) => self.renderToken(tokens, idx, options))
+
+md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {
+  const toc = env.toc as PostTocItem[] | undefined
+  const level = Number(tokens[idx].tag.slice(1))
+
+  if (toc && (level === 2 || level === 3)) {
+    const inline = tokens[idx + 1]
+    const title = inline?.type === 'inline' ? inline.content : ''
+    const id = uniqueHeadingId(title, toc)
+    tokens[idx].attrSet('id', id)
+    toc.push({ id, level, title })
+  }
+
+  return defaultHeadingOpen(tokens, idx, options, env, self)
+}
 
 const modules = import.meta.glob<string>('../content/**/*.md', {
   query: '?raw',
@@ -78,9 +108,43 @@ export function labelPostCollection(collection: string) {
   return postCollectionLabels[collection] ?? collection.replace(/-/g, ' ').toUpperCase()
 }
 
+function slugifyHeading(title: string) {
+  const slug = title
+    .trim()
+    .toLowerCase()
+    .replace(/[`~!@#$%^&*()+=[\]{}|\\:;"'<>,.?/]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+
+  return slug || 'section'
+}
+
+function uniqueHeadingId(title: string, toc: PostTocItem[]) {
+  const base = slugifyHeading(title)
+  let id = base
+  let index = 2
+
+  while (toc.some(item => item.id === id)) {
+    id = `${base}-${index}`
+    index += 1
+  }
+
+  return id
+}
+
 function formatTime(date: string) {
   const [year, month, day] = date.split('-')
   return [year, month, day].filter(Boolean).join(' · ')
+}
+
+function renderMarkdown(content: string, toc: PostTocItem[]) {
+  return md
+    .render(content, { toc })
+    .replace(
+      /<p>\s*(<span class="katex-display">[\s\S]*?<\/span>)\s*<\/p>/g,
+      '<div class="math-block">$1</div>'
+    )
 }
 
 export const posts: Post[] = Object.entries(modules)
@@ -90,6 +154,7 @@ export const posts: Post[] = Object.entries(modules)
     const slug = slugFromPath(path)
     const collection = collectionFromPath(path)
     const date = data.date ?? '1970-01-01'
+    const toc: PostTocItem[] = []
 
     return {
       slug,
@@ -101,7 +166,8 @@ export const posts: Post[] = Object.entries(modules)
       status: data.status ?? 'draft',
       deck: data.deck ?? '',
       fill: data.fill ?? 'dark',
-      html: md.render(parsed.content)
+      toc,
+      html: renderMarkdown(parsed.content, toc)
     }
   })
   .sort((a, b) => b.date.localeCompare(a.date))

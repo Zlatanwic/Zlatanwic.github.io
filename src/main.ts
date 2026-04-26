@@ -6,6 +6,7 @@ import Writing from './views/Writing.vue'
 import Post from './views/Post.vue'
 import Papers from './views/Papers.vue'
 import Likes from './views/Likes.vue'
+import 'katex/dist/katex.min.css'
 import './styles/global.css'
 
 const router = createRouter({

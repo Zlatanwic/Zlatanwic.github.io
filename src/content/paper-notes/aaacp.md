@@ -46,3 +46,25 @@ LlamaIndex
 | ChemCrow            | LLM          | Dynamic | Multi-step  |
 | Web-Augmented Agent | Host         | Static  | Single-step |
 ## profiling
+### System and Software Setup
++ Sys1 :高性能cpu+低性能gpu
++ Sys2 :高性能cpu+高性能gpu
+
+如果一个workload从Sys1改成Sys2之后速率有明显提升说明是gpu-bound，反之是cpu-bound
+### end2end latency分析
+测试了5个有代表性的workload
++ RAG / Haystack：检索是主瓶颈,所以bottleneck在cpu
++ Toolformer：LLM inference 仍然是主瓶颈
++ Web-Augmented Agent：Web I/O + LexRank 摘要很重,优化网络比优化llm inference更加重要
++ ChemCrow：heavy molecule 被 RDKit 主导
++ SWE-Agent：GPU 越强，CPU 代码执行越显眼，当gpu性能更强是会把latency占比推向cpu
+
+`2个key takeway`:
++ CPU 工具执行可以占 E2E latency 的很大部分
++ 高性能 GPU 会把瓶颈推向 CPU
+### Throughput Analysis
+对于gpu-only的llm inference,只测吞吐量：
+
+$$
+\mathrm{throughput} = \frac{BS \times (T_{in} + T_{out})}{t_{sec}}
+$$
