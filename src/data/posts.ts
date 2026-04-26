@@ -1,5 +1,89 @@
 import MarkdownIt from 'markdown-it'
-import markdownItKatex from 'markdown-it-katex'
+import katex from 'katex'
+
+type KatexOptions = { throwOnError?: boolean; errorColor?: string }
+
+function katexPlugin(md: MarkdownIt, opts: KatexOptions = {}) {
+  const renderMath = (src: string, displayMode: boolean) => {
+    try {
+      return katex.renderToString(src, {
+        throwOnError: opts.throwOnError ?? false,
+        errorColor: opts.errorColor ?? '#ff4eb2',
+        displayMode,
+        output: 'html'
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      return `<span class="katex-error" title="${md.utils.escapeHtml(message)}">${md.utils.escapeHtml(src)}</span>`
+    }
+  }
+
+  md.inline.ruler.after('escape', 'math_inline', (state, silent) => {
+    if (state.src[state.pos] !== '$') return false
+    const start = state.pos + 1
+    if (state.src[start] === '$') return false
+    const end = state.src.indexOf('$', start)
+    if (end === -1) return false
+    const content = state.src.slice(start, end)
+    if (!content.trim()) return false
+    if (/^\s|\s$/.test(content)) return false
+    if (!silent) {
+      const token = state.push('math_inline', 'math', 0)
+      token.markup = '$'
+      token.content = content
+    }
+    state.pos = end + 1
+    return true
+  })
+
+  md.block.ruler.after('blockquote', 'math_block', (state, startLine, endLine, silent) => {
+    const startPos = state.bMarks[startLine] + state.tShift[startLine]
+    const maxPos = state.eMarks[startLine]
+    if (startPos + 2 > maxPos) return false
+    if (state.src.slice(startPos, startPos + 2) !== '$$') return false
+
+    let nextLine = startLine
+    let lastLine: string | null = null
+    let found = false
+    let firstLine = state.src.slice(startPos + 2, maxPos)
+    if (firstLine.trim().endsWith('$$')) {
+      firstLine = firstLine.trim().slice(0, -2)
+      found = true
+    }
+
+    while (!found) {
+      nextLine += 1
+      if (nextLine >= endLine) break
+      const begin = state.bMarks[nextLine] + state.tShift[nextLine]
+      const end = state.eMarks[nextLine]
+      const line = state.src.slice(begin, end)
+      if (line.trim().endsWith('$$')) {
+        lastLine = line.trim().slice(0, -2)
+        found = true
+        break
+      }
+    }
+
+    if (!found) return false
+    if (silent) return true
+
+    const middle = nextLine > startLine
+      ? state.src.slice(state.bMarks[startLine + 1], state.bMarks[nextLine])
+      : ''
+    const content = [firstLine, middle, lastLine].filter(s => s !== null && s !== '').join('\n').trim()
+
+    const token = state.push('math_block', 'math', 0)
+    token.block = true
+    token.content = content
+    token.markup = '$$'
+    token.map = [startLine, nextLine + 1]
+    state.line = nextLine + 1
+    return true
+  }, { alt: [] })
+
+  md.renderer.rules.math_inline = (tokens, idx) => renderMath(tokens[idx].content, false)
+  md.renderer.rules.math_block = (tokens, idx) => `<div class="math-block">${renderMath(tokens[idx].content, true)}</div>`
+}
 
 export type PostStatus = 'draft' | 'planned' | 'published'
 export type PostFill = 'dark' | 'mint' | 'uv' | 'yellow'
@@ -43,7 +127,7 @@ const md = new MarkdownIt({
   html: false,
   linkify: true,
   typographer: true
-}).use(markdownItKatex, {
+}).use(katexPlugin, {
   throwOnError: false,
   errorColor: '#ff4eb2'
 })
@@ -139,12 +223,7 @@ function formatTime(date: string) {
 }
 
 function renderMarkdown(content: string, toc: PostTocItem[]) {
-  return md
-    .render(content, { toc })
-    .replace(
-      /<p>\s*(<span class="katex-display">[\s\S]*?<\/span>)\s*<\/p>/g,
-      '<div class="math-block">$1</div>'
-    )
+  return md.render(content, { toc })
 }
 
 export const posts: Post[] = Object.entries(modules)

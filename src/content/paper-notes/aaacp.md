@@ -68,3 +68,26 @@ LlamaIndex
 $$
 \mathrm{throughput} = \frac{BS \times (T_{in} + T_{out})}{t_{sec}}
 $$
++ BS: batch size
++ Tin: input tokens
++ Tout: output tokens
++ tsec: 生成这些 token 的总时间
+
+实验发现，随着 batch size 增大，GPU throughput 稳步上升，说明 GPU 能有效利用 batch 并行。
+
+但到大 batch 后，吞吐增长变慢甚至饱和。
+
+原因是：
+
+batch size 越大
+ → KV cache footprint 越大
+ → GPU memory capacity 和 bandwidth 压力越大
+ → throughput 开始饱和
+
+论文特别指出，PagedAttention 可以减少 memory fragmentation、提升 serving 效率，但不能消除 GPU 显存容量和带宽的根本限制。
+
+这部分其实是在说：
+
+即使是 GPU-only LLM serving，
+batch scaling 也不是无限的；
+最后仍会遇到显存和带宽瓶颈。
