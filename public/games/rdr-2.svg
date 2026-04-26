@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#a51f18"/>
+  <circle cx="620" cy="150" r="88" fill="#f5d000"/>
+  <path d="M0 360 L135 265 L230 342 L330 235 L438 374 L548 292 L800 436 V600 H0 Z" fill="#131313"/>
+  <path d="M0 435 L160 358 L252 424 L376 318 L482 448 L624 380 L800 485 V600 H0 Z" fill="#2d2d2d"/>
+  <rect x="46" y="44" width="708" height="512" rx="34" fill="none" stroke="#ffffff" stroke-width="5"/>
+  <text x="78" y="204" fill="#fff" font-family="Impact, Arial Black, sans-serif" font-size="96" letter-spacing="5">RDR 2</text>
+  <text x="84" y="292" fill="#f5d000" font-family="Courier New, monospace" font-size="32" font-weight="700" letter-spacing="7">OPEN WORLD</text>
+  <text x="84" y="500" fill="#fff" font-family="Arial, sans-serif" font-size="30" font-weight="700">FRONTIER / STORY / LONG RIDE</text>
+</svg>

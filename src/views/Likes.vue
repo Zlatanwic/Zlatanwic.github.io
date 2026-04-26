@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import CircularGallery from '../components/CircularGallery.vue'
+
 const football = {
   club: 'MAN. CITY',
   since: '忠实球迷',
@@ -7,11 +9,36 @@ const football = {
 }
 
 const games = [
-  { name: 'GTA V', tag: 'OPEN WORLD', note: '反复回到 Los Santos——只为开车在公路上听电台。' },
-  { name: 'CYBERPUNK 2077', tag: 'RPG', note: 'Phantom Liberty 之后，夜之城终于配得上它的故事。' },
-  { name: 'RDR 2', tag: 'OPEN WORLD', note: '到现在仍然觉得它是叙事的天花板。' },
-  { name: 'RESIDENT EVIL SERIES', tag: 'SURVIVAL HORROR', note: '从洋馆到浣熊市，最迷人的是资源紧张时那种冷静的求生感。' }
+  {
+    name: 'GTA V',
+    tag: 'OPEN WORLD',
+    image: '/games/gta5.jpg',
+    note: '反复回到 Los Santos——只为开车在公路上听电台。'
+  },
+  {
+    name: 'CYBERPUNK 2077',
+    tag: 'RPG',
+    image: '/games/johnny.jpg',
+    note: 'Phantom Liberty 之后，夜之城终于配得上它的故事。'
+  },
+  {
+    name: 'RDR 2',
+    tag: 'OPEN WORLD',
+    image: '/games/ather.jpg',
+    note: '到现在仍然觉得它是叙事的天花板。'
+  },
+  {
+    name: 'RESIDENT EVIL SERIES',
+    tag: 'SURVIVAL HORROR',
+    image: '/games/grace.jpg',
+    note: '从洋馆到浣熊市，最迷人的是资源紧张时那种冷静的求生感。'
+  }
 ]
+
+const gameGalleryItems = games.map(game => ({
+  image: game.image,
+  text: game.name
+}))
 
 const others = [
   { label: '阅读', items: ['长稿非虚构', '系统类教科书', '少量科幻'] },
@@ -51,7 +78,18 @@ const others = [
         <span class="kicker">GAMES / 单机</span>
         <h2 class="display display-lg">RUN&nbsp;IT&nbsp;BACK.</h2>
       </div>
-      <div class="game-grid">
+      <div class="game-gallery">
+        <CircularGallery
+          :items="gameGalleryItems"
+          :bend="2"
+          :border-radius="0.08"
+          :scroll-speed="2.2"
+          :scroll-ease="0.06"
+          text-color="#3cffd0"
+          font="bold 28px JetBrains Mono"
+        />
+      </div>
+      <div class="game-grid game-notes">
         <article v-for="(g, i) in games" :key="g.name" class="game" :data-fill="i % 4">
           <div class="game-head">
             <span class="kicker tile-kicker">{{ g.tag }}</span>
@@ -129,10 +167,22 @@ const others = [
 }
 .section-head h2 { margin: 0; }
 
+.game-gallery {
+  height: clamp(320px, 46vw, 520px);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  background: var(--canvas);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
 .game-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1rem;
+}
+.game-notes {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 .game {
   border-radius: 20px;
@@ -142,7 +192,7 @@ const others = [
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
-  min-height: 200px;
+  min-height: 170px;
   transition: border-color var(--dur) var(--ease),
     transform var(--dur) var(--ease);
 }

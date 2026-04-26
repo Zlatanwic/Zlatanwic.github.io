@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#f5d000"/>
+  <path d="M0 0 H800 V170 L0 92 Z" fill="#5200ff"/>
+  <path d="M0 600 H800 V380 L0 488 Z" fill="#131313"/>
+  <rect x="58" y="68" width="684" height="464" rx="30" fill="none" stroke="#131313" stroke-width="7"/>
+  <text x="76" y="218" fill="#131313" font-family="Impact, Arial Black, sans-serif" font-size="82" letter-spacing="3">CYBERPUNK</text>
+  <text x="80" y="315" fill="#5200ff" font-family="Impact, Arial Black, sans-serif" font-size="94">2077</text>
+  <text x="86" y="420" fill="#131313" font-family="Courier New, monospace" font-size="30" font-weight="700" letter-spacing="8">RPG / NIGHT CITY</text>
+  <text x="86" y="502" fill="#3cffd0" font-family="Arial, sans-serif" font-size="30" font-weight="700">PHANTOM LIBERTY AFTERGLOW</text>
+</svg>
