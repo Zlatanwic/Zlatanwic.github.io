@@ -3,8 +3,17 @@ import MarkdownIt from 'markdown-it'
 export type PostStatus = 'draft' | 'planned' | 'published'
 export type PostFill = 'dark' | 'mint' | 'uv' | 'yellow'
 
+export const postCollectionLabels: Record<string, string> = {
+  'project-logs': 'PROJECT LOGS',
+  'paper-notes': 'PAPER NOTES',
+  tech: 'TECH',
+  essays: 'ESSAYS',
+  pages: 'PAGES'
+}
+
 export interface Post {
   slug: string
+  collection: string
   title: string
   date: string
   time: string
@@ -30,7 +39,7 @@ const md = new MarkdownIt({
   typographer: true
 })
 
-const modules = import.meta.glob<string>('../content/posts/*.md', {
+const modules = import.meta.glob<string>('../content/**/*.md', {
   query: '?raw',
   import: 'default',
   eager: true
@@ -63,6 +72,14 @@ function slugFromPath(path: string) {
   return path.split('/').pop()?.replace(/\.md$/, '') ?? path
 }
 
+function collectionFromPath(path: string) {
+  return path.match(/content\/([^/]+)\//)?.[1] ?? 'posts'
+}
+
+export function labelPostCollection(collection: string) {
+  return postCollectionLabels[collection] ?? collection.replace(/-/g, ' ').toUpperCase()
+}
+
 function formatTime(date: string) {
   const [year, month, day] = date.split('-')
   return [year, month, day].filter(Boolean).join(' · ')
@@ -73,10 +90,12 @@ export const posts: Post[] = Object.entries(modules)
     const parsed = parseFrontmatter(raw)
     const data = parsed.data
     const slug = slugFromPath(path)
+    const collection = collectionFromPath(path)
     const date = data.date ?? '1970-01-01'
 
     return {
       slug,
+      collection,
       title: data.title ?? slug,
       date,
       time: formatTime(date),

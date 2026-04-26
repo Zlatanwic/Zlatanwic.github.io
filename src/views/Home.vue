@@ -5,6 +5,7 @@ import type { Locale } from '../composables/useLocale'
 import { projects } from '../data/projects'
 import type { Localized } from '../data/projects'
 import { openSourceProjects } from '../data/openSourceProjects'
+import { publications } from '../data/publications'
 import LocaleToggle from '../components/LocaleToggle.vue'
 import GithubGrid from '../components/GithubGrid.vue'
 
@@ -42,6 +43,8 @@ const i18n = {
     awardsTitle: '竞赛获奖',
     openSourceKicker: '开源',
     openSourceTitle: '参与的有趣开源项目',
+    publicationsKicker: '发表',
+    publicationsTitle: '论文',
     workKicker: '代表项目',
     workTitle: '项目'
   },
@@ -56,6 +59,8 @@ const i18n = {
     awardsTitle: 'COMPETITION.LOG',
     openSourceKicker: 'OPEN SOURCE',
     openSourceTitle: 'INTERESTING PROJECTS',
+    publicationsKicker: 'PUBLICATIONS',
+    publicationsTitle: 'PAPERS',
     workKicker: 'SELECTED WORK',
     workTitle: 'PROJECTS'
   }
@@ -70,6 +75,8 @@ const i18n = {
   awardsTitle: string
   openSourceKicker: string
   openSourceTitle: string
+  publicationsKicker: string
+  publicationsTitle: string
   workKicker: string
   workTitle: string
 }>
@@ -198,6 +205,7 @@ const pick = <T,>(val: Localized<T> | T) =>
     ? (val as Localized<T>)[locale.value]
     : val
 const arr = <T,>(val: T[] | Localized<T[]>) => (Array.isArray(val) ? val : val[locale.value])
+const isPdf = (path: string) => path.toLowerCase().endsWith('.pdf')
 </script>
 
 <template>
@@ -216,6 +224,69 @@ const arr = <T,>(val: T[] | Localized<T[]>) => (Array.isArray(val) ? val : val[l
     </header>
 
     <GithubGrid :locale="locale" />
+
+    <hr class="rule" />
+
+    <section>
+      <div class="section-head">
+        <span class="kicker kicker-uv">{{ tt.publicationsKicker }}</span>
+        <h2 class="display display-lg">{{ tt.publicationsTitle }}</h2>
+      </div>
+      <div class="publication-list">
+        <article
+          v-for="paper in publications"
+          :key="paper.title"
+          class="publication-card"
+        >
+          <div class="publication-copy">
+            <div class="publication-meta">
+              <span class="kicker tile-kicker">{{ pick(paper.venue) }}</span>
+              <span class="label-meta">{{ pick(paper.status) }}</span>
+            </div>
+            <h3 class="publication-title">
+              <a
+                v-if="paper.url"
+                :href="paper.url"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {{ paper.title }}
+              </a>
+              <template v-else>{{ paper.title }}</template>
+            </h3>
+            <p class="publication-authors">{{ pick(paper.authors) }}</p>
+            <p class="publication-summary">{{ pick(paper.summary) }}</p>
+            <div class="publication-tags">
+              <span v-for="tag in paper.tags" :key="tag" class="tag tag--ghost">{{ tag }}</span>
+            </div>
+          </div>
+          <figure class="publication-figure">
+            <object
+              v-if="isPdf(paper.architectureImage)"
+              class="publication-pdf"
+              :data="`${paper.architectureImage}#toolbar=0&navpanes=0&scrollbar=0`"
+              type="application/pdf"
+              :aria-label="String(pick(paper.architectureAlt))"
+            >
+              <a
+                class="publication-pdf-fallback"
+                :href="paper.architectureImage"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                OPEN ARCHITECTURE PDF
+              </a>
+            </object>
+            <img
+              v-else
+              :src="paper.architectureImage"
+              :alt="String(pick(paper.architectureAlt))"
+              loading="lazy"
+            >
+          </figure>
+        </article>
+      </div>
+    </section>
 
     <hr class="rule" />
 
@@ -398,6 +469,109 @@ const arr = <T,>(val: T[] | Localized<T[]>) => (Array.isArray(val) ? val : val[l
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1rem;
+}
+
+.publication-list {
+  display: grid;
+  gap: 1rem;
+}
+.publication-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+  gap: clamp(1rem, 2vw, 1.6rem);
+  align-items: stretch;
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  padding: clamp(1rem, 2vw, 1.4rem);
+  background: var(--canvas);
+  transition: border-color var(--dur) var(--ease);
+}
+.publication-card:hover {
+  border-color: var(--mint);
+}
+.publication-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.25rem;
+  min-width: 0;
+}
+.publication-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.publication-title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1.45rem, 1.1rem + 1.2vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--text);
+  transition: color var(--dur) var(--ease);
+}
+.publication-title a {
+  color: inherit;
+}
+.publication-card:hover .publication-title {
+  color: var(--hover-blue);
+}
+.publication-authors {
+  margin: 0;
+  color: var(--mint);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.publication-summary {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 62ch;
+}
+.publication-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: auto;
+}
+.publication-figure {
+  margin: 0;
+  min-width: 0;
+  border: 1px solid var(--hairline-dim);
+  border-radius: 18px;
+  background: var(--tile-white);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+.publication-figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.publication-pdf {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--tile-white);
+}
+.publication-pdf-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--uv);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .tile {
@@ -856,6 +1030,9 @@ const arr = <T,>(val: T[] | Localized<T[]>) => (Array.isArray(val) ? val : val[l
 }
 
 @media (max-width: 720px) {
+  .publication-card {
+    grid-template-columns: 1fr;
+  }
   .experience-stream {
     padding-left: 1.5rem;
   }

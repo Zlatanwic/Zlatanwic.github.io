@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { posts } from '../data/posts'
+import { labelPostCollection, posts } from '../data/posts'
 
 const searchQuery = ref('')
+const activeCollection = ref('ALL')
 const activeCategory = ref('ALL')
+
+const collections = computed(() => [
+  'ALL',
+  ...Array.from(new Set(posts.map(post => post.collection)))
+])
 
 const categories = computed(() => [
   'ALL',
@@ -13,6 +19,10 @@ const categories = computed(() => [
 
 const filteredPosts = computed(() => {
   let list = posts
+  if (activeCollection.value !== 'ALL') {
+    list = list.filter(post => post.collection === activeCollection.value)
+  }
+
   if (activeCategory.value !== 'ALL') {
     list = list.filter(post => post.category === activeCategory.value)
   }
@@ -22,6 +32,8 @@ const filteredPosts = computed(() => {
     list = list.filter(post =>
       [
         post.title,
+        post.collection,
+        labelPostCollection(post.collection),
         post.category,
         post.deck,
         post.status,
@@ -32,6 +44,11 @@ const filteredPosts = computed(() => {
 
   return list
 })
+
+const collectionCount = (collection: string) =>
+  collection === 'ALL'
+    ? posts.length
+    : posts.filter(post => post.collection === collection).length
 
 const categoryCount = (category: string) =>
   category === 'ALL'
@@ -70,6 +87,25 @@ const categoryCount = (category: string) =>
       </button>
     </div>
 
+    <nav class="filter" aria-label="Filter writing by folder">
+      <span class="kicker filter-label">FOLDER /</span>
+      <div class="chips" role="tablist">
+        <button
+          v-for="collection in collections"
+          :key="collection"
+          type="button"
+          class="chip"
+          role="tab"
+          :aria-selected="activeCollection === collection"
+          :class="{ 'is-active': activeCollection === collection }"
+          @click="activeCollection = collection"
+        >
+          <span>{{ collection === 'ALL' ? 'ALL' : labelPostCollection(collection) }}</span>
+          <span class="chip-count">{{ collectionCount(collection) }}</span>
+        </button>
+      </div>
+    </nav>
+
     <nav class="filter" aria-label="Filter writing by category">
       <span class="kicker filter-label">TAG /</span>
       <div class="chips" role="tablist">
@@ -100,7 +136,7 @@ const categoryCount = (category: string) =>
           <span class="rail-time label-meta">{{ p.time }}</span>
           <article class="story-card">
             <div class="row">
-              <span class="kicker tile-kicker">{{ p.category }}</span>
+              <span class="kicker tile-kicker">{{ labelPostCollection(p.collection) }} / {{ p.category }}</span>
               <span class="num label-meta">{{ String(i + 1).padStart(2, '0') }} / {{ String(filteredPosts.length).padStart(2, '0') }}</span>
             </div>
             <h2 class="story-title">
@@ -120,7 +156,7 @@ const categoryCount = (category: string) =>
       </ul>
       <p v-else class="empty">
         <span class="label-meta">
-          NO DISPATCHES UNDER “{{ activeCategory }}”
+          NO MATCHING DISPATCHES
           <template v-if="searchQuery"> / “{{ searchQuery }}”</template>
           YET.
         </span>

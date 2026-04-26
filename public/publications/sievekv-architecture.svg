@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">SIEVEKV Architecture</title>
+  <desc id="desc">A compact architecture diagram for semantic-aware KV cache eviction.</desc>
+  <rect width="960" height="540" fill="#f6f4ee"/>
+  <g fill="none" stroke="#111" stroke-width="2">
+    <rect x="42" y="56" width="190" height="122" rx="14" fill="#ffffff"/>
+    <rect x="42" y="362" width="190" height="122" rx="14" fill="#ffffff"/>
+    <rect x="324" y="58" width="258" height="424" rx="18" fill="#d8ff66"/>
+    <rect x="698" y="94" width="214" height="144" rx="16" fill="#ffffff"/>
+    <rect x="698" y="304" width="214" height="144" rx="16" fill="#6d5dfc"/>
+  </g>
+  <g font-family="Inter, Arial, sans-serif" fill="#111">
+    <text x="70" y="94" font-size="18" font-weight="700">Long Context</text>
+    <text x="70" y="124" font-size="13">Prompt tokens</text>
+    <text x="70" y="146" font-size="13">Query window</text>
+    <text x="70" y="400" font-size="18" font-weight="700">Attention Trace</text>
+    <text x="70" y="430" font-size="13">Heads / layers</text>
+    <text x="70" y="452" font-size="13">Recent decode steps</text>
+    <text x="360" y="102" font-size="22" font-weight="800">SIEVEKV</text>
+    <text x="360" y="132" font-size="13">Semantic-aware scoring module</text>
+  </g>
+  <g font-family="Inter, Arial, sans-serif" font-size="14" fill="#111">
+    <rect x="360" y="166" width="186" height="42" rx="10" fill="#f6f4ee" stroke="#111"/>
+    <text x="382" y="192">Attention Quality</text>
+    <rect x="360" y="226" width="186" height="42" rx="10" fill="#f6f4ee" stroke="#111"/>
+    <text x="414" y="252">Head Entropy</text>
+    <rect x="360" y="286" width="186" height="42" rx="10" fill="#f6f4ee" stroke="#111"/>
+    <text x="397" y="312">Info Density</text>
+    <rect x="360" y="346" width="186" height="42" rx="10" fill="#f6f4ee" stroke="#111"/>
+    <text x="391" y="372">Query Relevance</text>
+    <rect x="360" y="406" width="186" height="42" rx="10" fill="#f6f4ee" stroke="#111"/>
+    <text x="395" y="432">Factual Likelihood</text>
+  </g>
+  <g font-family="Inter, Arial, sans-serif" fill="#111">
+    <text x="730" y="138" font-size="18" font-weight="700">Eviction Policy</text>
+    <text x="730" y="168" font-size="13">Token retention score</text>
+    <text x="730" y="190" font-size="13">Budget-aware selection</text>
+    <text x="730" y="348" font-size="18" font-weight="700" fill="#fff">Compact KV Cache</text>
+    <text x="730" y="378" font-size="13" fill="#fff">Preserve useful memory</text>
+    <text x="730" y="400" font-size="13" fill="#fff">Reduce decode footprint</text>
+  </g>
+  <g stroke="#111" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M232 117h76"/>
+    <path d="m298 107 12 10-12 10"/>
+    <path d="M232 423h76"/>
+    <path d="m298 413 12 10-12 10"/>
+    <path d="M582 166h100"/>
+    <path d="m672 156 12 10-12 10"/>
+    <path d="M805 238v50"/>
+    <path d="m795 278 10 12 10-12"/>
+  </g>
+  <g fill="#111">
+    <circle cx="137" cy="226" r="4"/>
+    <circle cx="167" cy="226" r="4"/>
+    <circle cx="197" cy="226" r="4"/>
+    <circle cx="453" cy="506" r="4"/>
+    <circle cx="483" cy="506" r="4"/>
+    <circle cx="513" cy="506" r="4"/>
+  </g>
+</svg>

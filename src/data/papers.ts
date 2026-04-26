@@ -31,6 +31,7 @@ export interface Paper {
   area?: string
   status: PaperStatus
   takeaway?: string
+  noteSlug?: string
 }
 
 export const papers: Paper[] = [
@@ -41,6 +42,7 @@ export const papers: Paper[] = [
     category: 'INFERENCE',
     area: 'KV CACHE',
     status: 'read',
+    noteSlug: 'kv-cache-eviction',
     takeaway:
       '基于 prompt 末段窗口 vote 出关注的 token 位置——简单但偏向 recency；长上下文检索任务上掉得很快。'
   },
@@ -51,6 +53,7 @@ export const papers: Paper[] = [
     category: 'INFERENCE',
     area: 'KV CACHE',
     status: 'read',
+    noteSlug: 'kv-cache-eviction',
     takeaway:
       '“近期 + 累积注意力大者” 的两段式保留，奠定后续 eviction 工作的常见 baseline 形态。'
   },
@@ -105,9 +108,11 @@ export const papers: Paper[] = [
   {
     title: 'Towards Understanding, Analyzing, and Optimizing Agentic AI Execution: A CPU-Centric Perspective',
     url: 'https://arxiv.org/abs/2511.00739',
-    venue: 'MLSys 2025',
+    venue: 'arxiv 2026',
     category: 'INFERENCE',
-    status: 'reading'
+    status: 'reading',
+    area:'agentic AI',
+    noteSlug: 'aaacp'
   }
 ]
 

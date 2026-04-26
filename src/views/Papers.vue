@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import { categoryOrder, papers, statusLabel, statusOrder } from '../data/papers'
 import type { Paper, PaperCategory, PaperStatus } from '../data/papers'
 
@@ -36,6 +37,7 @@ const filtered = computed(() => {
         p.category,
         p.area,
         p.takeaway,
+        p.noteSlug,
         statusLabel[p.status]
       ]
         .filter(Boolean)
@@ -196,6 +198,14 @@ const statusCount = (s: FilterStatus) => {
           <template v-else>{{ p.title }}</template>
         </h2>
         <p v-if="p.takeaway" class="paper-take">{{ p.takeaway }}</p>
+        <div v-if="p.noteSlug" class="paper-actions">
+          <RouterLink
+            class="note-link"
+            :to="{ name: 'post', params: { slug: p.noteSlug } }"
+          >
+            READ NOTE<span class="link-arrow" aria-hidden="true">-&gt;</span>
+          </RouterLink>
+        </div>
       </li>
     </ul>
 
@@ -494,6 +504,35 @@ const statusCount = (s: FilterStatus) => {
   color: var(--text-muted);
   line-height: 1.6;
   max-width: 70ch;
+}
+.paper-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 0.85rem;
+}
+.note-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mint);
+  border-bottom: 1px solid transparent;
+  transition: color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.note-link:hover {
+  color: var(--hover-blue);
+  border-bottom-color: var(--hover-blue);
+}
+.note-link:focus-visible {
+  outline: 2px solid var(--focus-cyan);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 .empty {
