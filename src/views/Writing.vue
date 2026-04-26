@@ -1,34 +1,42 @@
 <script setup lang="ts">
-const posts = [
-  {
-    time: '2026 · 03 · 24',
-    fill: 'dark',
-    tag: '工程',
-    title: '用 Vue 重写个人站点的几条原则',
-    deck: '从 VitePress 迁回 Vue + Vite 的取舍：内容更少、结构更紧、首页只回答一件事——“你是谁，在做什么”。'
-  },
-  {
-    time: '2026 · 02 · 18',
-    fill: 'mint',
-    tag: 'MLSYS',
-    title: 'KV CACHE 驱逐：从启发式到语义信号',
-    deck: 'SnapKV、H2O 这些基于注意力分数的策略到底丢掉了什么？记一些在 SieveKV 实验里观察到的现象。'
-  },
-  {
-    time: '2026 · 01 · 09',
-    fill: 'dark',
-    tag: 'CUDA',
-    title: 'PAGED ATTENTION 的访存账',
-    deck: '把 gather + attention 合成一个 kernel，看 Nsight 学到的几件事：occupancy 不是越高越好。'
-  },
-  {
-    time: '2025 · 12 · 02',
-    fill: 'uv',
-    tag: 'SYSTEMS',
-    title: '为什么我又写了一个内核',
-    deck: 'NovaOS 不是为了发明新东西。它是为了让我对着每一行 unsafe 都说得清楚“为什么这里必须不安全”。'
+import { computed, ref } from 'vue'
+import { RouterLink } from 'vue-router'
+import { posts } from '../data/posts'
+
+const searchQuery = ref('')
+const activeCategory = ref('ALL')
+
+const categories = computed(() => [
+  'ALL',
+  ...Array.from(new Set(posts.map(post => post.category)))
+])
+
+const filteredPosts = computed(() => {
+  let list = posts
+  if (activeCategory.value !== 'ALL') {
+    list = list.filter(post => post.category === activeCategory.value)
   }
-]
+
+  const q = searchQuery.value.trim().toLowerCase()
+  if (q) {
+    list = list.filter(post =>
+      [
+        post.title,
+        post.category,
+        post.deck,
+        post.status,
+        post.time
+      ].some(value => value.toLowerCase().includes(q))
+    )
+  }
+
+  return list
+})
+
+const categoryCount = (category: string) =>
+  category === 'ALL'
+    ? posts.length
+    : posts.filter(post => post.category === category).length
 </script>
 
 <template>
@@ -41,10 +49,50 @@ const posts = [
       </p>
     </header>
 
+    <div class="search-row">
+      <label class="kicker search-label" for="post-search">SEARCH /</label>
+      <input
+        id="post-search"
+        v-model="searchQuery"
+        class="search-input"
+        type="search"
+        placeholder="TITLE / CATEGORY / STATUS"
+        autocomplete="off"
+      >
+      <button
+        v-if="searchQuery"
+        class="search-clear"
+        type="button"
+        aria-label="Clear search"
+        @click="searchQuery = ''"
+      >
+        CLEAR
+      </button>
+    </div>
+
+    <nav class="filter" aria-label="Filter writing by category">
+      <span class="kicker filter-label">TAG /</span>
+      <div class="chips" role="tablist">
+        <button
+          v-for="category in categories"
+          :key="category"
+          type="button"
+          class="chip"
+          role="tab"
+          :aria-selected="activeCategory === category"
+          :class="{ 'is-active': activeCategory === category }"
+          @click="activeCategory = category"
+        >
+          <span>{{ category }}</span>
+          <span class="chip-count">{{ categoryCount(category) }}</span>
+        </button>
+      </div>
+    </nav>
+
     <section class="stream">
-      <ul class="story-stream" role="list">
+      <ul v-if="filteredPosts.length" class="story-stream" role="list">
         <li
-          v-for="(p, i) in posts"
+          v-for="(p, i) in filteredPosts"
           :key="p.title"
           class="story-item"
           :data-fill="p.fill"
@@ -52,18 +100,34 @@ const posts = [
           <span class="rail-time label-meta">{{ p.time }}</span>
           <article class="story-card">
             <div class="row">
-              <span class="kicker tile-kicker">{{ p.tag }}</span>
-              <span class="num label-meta">{{ String(i + 1).padStart(2, '0') }} / {{ String(posts.length).padStart(2, '0') }}</span>
+              <span class="kicker tile-kicker">{{ p.category }}</span>
+              <span class="num label-meta">{{ String(i + 1).padStart(2, '0') }} / {{ String(filteredPosts.length).padStart(2, '0') }}</span>
             </div>
-            <h2 class="story-title">{{ p.title }}</h2>
+            <h2 class="story-title">
+              <RouterLink :to="{ name: 'post', params: { slug: p.slug } }">
+                {{ p.title }}
+              </RouterLink>
+            </h2>
             <p class="story-deck">{{ p.deck }}</p>
-            <a class="readmore" href="#" @click.prevent>READ →</a>
+            <div class="story-actions">
+              <RouterLink class="readmore" :to="{ name: 'post', params: { slug: p.slug } }">
+                READ →
+              </RouterLink>
+              <span class="tag tag--ghost">{{ p.status }}</span>
+            </div>
           </article>
         </li>
       </ul>
+      <p v-else class="empty">
+        <span class="label-meta">
+          NO DISPATCHES UNDER “{{ activeCategory }}”
+          <template v-if="searchQuery"> / “{{ searchQuery }}”</template>
+          YET.
+        </span>
+      </p>
     </section>
 
-    <p class="hint">更多文章正在整理中。</p>
+    <p v-if="!posts.length" class="hint">更多文章正在整理中。</p>
   </article>
 </template>
 
@@ -77,6 +141,125 @@ const posts = [
 .head h1 {
   margin: 0;
   letter-spacing: 0.01em;
+}
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: clamp(1.4rem, 2vw, 2rem);
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--hairline-dim);
+}
+.search-label {
+  color: var(--mint);
+  flex-shrink: 0;
+}
+.search-input {
+  width: min(620px, 100%);
+  min-width: 0;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  padding: 0.65rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.search-input::placeholder {
+  color: var(--text-meta);
+  opacity: 0.85;
+}
+.search-input:focus {
+  border-color: var(--mint);
+  box-shadow: 0 0 0 1px var(--mint) inset;
+}
+.search-clear {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--uv);
+  background: transparent;
+  border: 1px solid var(--uv);
+  border-radius: 24px;
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease),
+    color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.search-clear:hover {
+  background: var(--uv);
+  color: var(--white);
+}
+.filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 0.7rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--hairline-dim);
+}
+.filter-label {
+  color: var(--uv);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.chip {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  padding: 0.45rem 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+.chip:hover {
+  color: var(--mint);
+  border-color: var(--mint);
+}
+.chip.is-active {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: var(--black);
+}
+.chip-count {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 0.05rem 0.4rem;
+  border-radius: 12px;
+  background: var(--canvas);
+  color: var(--text-meta);
+  border: 1px solid var(--hairline-dim);
+  min-width: 1.4rem;
+  text-align: center;
+}
+.chip.is-active .chip-count {
+  background: var(--black);
+  color: var(--mint);
+  border-color: var(--black);
 }
 .stream {
   margin-top: clamp(2rem, 3vw, 3rem);
@@ -152,6 +335,9 @@ const posts = [
   letter-spacing: 0.005em;
   transition: color var(--dur) var(--ease);
 }
+.story-title a {
+  color: inherit;
+}
 .story-deck {
   margin: 0;
   color: var(--text-muted);
@@ -169,6 +355,16 @@ const posts = [
 }
 .readmore:hover {
   color: var(--hover-blue);
+}
+.story-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-top: 0.9rem;
+}
+.story-actions .readmore {
+  margin-top: 0;
 }
 
 /* fill variants */
@@ -201,8 +397,22 @@ const posts = [
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
+.empty {
+  margin: 3rem 0;
+  text-align: center;
+  padding: 2rem;
+  border: 1px dashed var(--hairline-dim);
+  border-radius: 20px;
+}
 
 @media (max-width: 720px) {
+  .search-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .search-clear {
+    align-self: flex-start;
+  }
   .story-stream { padding-left: 1.5rem; }
   .story-stream::before { left: 0.9rem; }
   .rail-time {

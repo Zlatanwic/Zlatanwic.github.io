@@ -16,6 +16,7 @@ const categories: FilterCategory[] = ['ALL', ...categoryOrder]
 
 const activeCategory = ref<FilterCategory>('ALL')
 const activeStatus = ref<FilterStatus>('ALL')
+const searchQuery = ref('')
 
 // Two-stage filter: category narrows, then status narrows further.
 const filtered = computed(() => {
@@ -25,6 +26,21 @@ const filtered = computed(() => {
   }
   if (activeStatus.value !== 'ALL') {
     list = list.filter(p => p.status === activeStatus.value)
+  }
+  const q = searchQuery.value.trim().toLowerCase()
+  if (q) {
+    list = list.filter(p =>
+      [
+        p.title,
+        p.venue,
+        p.category,
+        p.area,
+        p.takeaway,
+        statusLabel[p.status]
+      ]
+        .filter(Boolean)
+        .some(value => value!.toLowerCase().includes(q))
+    )
   }
   return list
 })
@@ -74,6 +90,27 @@ const statusCount = (s: FilterStatus) => {
         </div>
       </div>
     </header>
+
+    <div class="search-row">
+      <label class="kicker search-label" for="paper-search">SEARCH /</label>
+      <input
+        id="paper-search"
+        v-model="searchQuery"
+        class="search-input"
+        type="search"
+        placeholder="TITLE / VENUE / CATEGORY / AREA"
+        autocomplete="off"
+      >
+      <button
+        v-if="searchQuery"
+        class="search-clear"
+        type="button"
+        aria-label="Clear search"
+        @click="searchQuery = ''"
+      >
+        CLEAR
+      </button>
+    </div>
 
     <!-- Category filter -->
     <nav class="filter" aria-label="Filter by category">
@@ -165,7 +202,9 @@ const statusCount = (s: FilterStatus) => {
     <p v-else class="empty">
       <span class="label-meta">
         NO PAPERS UNDER “{{ activeCategory }}” /
-        “{{ activeStatus === 'ALL' ? 'ALL' : statusLabel[activeStatus] }}” YET — 这个组合还没有论文。
+        “{{ activeStatus === 'ALL' ? 'ALL' : statusLabel[activeStatus] }}”
+        <template v-if="searchQuery"> / “{{ searchQuery }}”</template>
+        YET — 这个组合还没有论文。
       </span>
     </p>
   </article>
@@ -212,6 +251,62 @@ const statusCount = (s: FilterStatus) => {
 }
 
 /* ---- Filter rows ---- */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: clamp(1.4rem, 2vw, 2rem);
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--hairline-dim);
+}
+.search-label {
+  color: var(--mint);
+  flex-shrink: 0;
+}
+.search-input {
+  width: min(620px, 100%);
+  min-width: 0;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  padding: 0.65rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.search-input::placeholder {
+  color: var(--text-meta);
+  opacity: 0.85;
+}
+.search-input:focus {
+  border-color: var(--mint);
+  box-shadow: 0 0 0 1px var(--mint) inset;
+}
+.search-clear {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--uv);
+  background: transparent;
+  border: 1px solid var(--uv);
+  border-radius: 24px;
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease),
+    color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.search-clear:hover {
+  background: var(--uv);
+  color: var(--white);
+}
 .filter {
   display: flex;
   align-items: center;
@@ -221,7 +316,7 @@ const statusCount = (s: FilterStatus) => {
   border-bottom: 1px dashed var(--hairline-dim);
 }
 .filter:first-of-type {
-  margin-top: clamp(1.4rem, 2vw, 2rem);
+  margin-top: 0.7rem;
 }
 .filter-status {
   margin-top: 0.7rem;
@@ -407,5 +502,15 @@ const statusCount = (s: FilterStatus) => {
   padding: 2rem;
   border: 1px dashed var(--hairline-dim);
   border-radius: 20px;
+}
+
+@media (max-width: 640px) {
+  .search-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .search-clear {
+    align-self: flex-start;
+  }
 }
 </style>

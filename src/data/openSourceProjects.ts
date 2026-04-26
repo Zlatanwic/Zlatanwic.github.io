@@ -53,7 +53,7 @@ export const openSourceProjects: OpenSourceProject[] = [
     url: 'https://github.com/Zlatanwic/Fin-RAG'
   },
   {
-    name: 'SkVM',
+    name: 'SJTU-IPADS/SkVM',
     fill: 'white',
     role: {
       zh: 'Agent Skills 语言虚拟机 · 并行编译与运行时',
