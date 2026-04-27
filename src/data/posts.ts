@@ -100,6 +100,12 @@ export const postCollectionLabels: Record<string, string> = {
   misc: 'MISC'
 }
 
+export const postCollectionDecks: Record<string, string> = {
+  'paper-notes': 'reading notes',
+  tech: 'technical blogs',
+  misc: 'logs & essays'
+}
+
 export interface Post {
   slug: string
   collection: string
@@ -189,7 +195,11 @@ function collectionFromPath(path: string) {
 }
 
 export function labelPostCollection(collection: string) {
-  return postCollectionLabels[collection] ?? collection.replace(/-/g, ' ').toUpperCase()
+  return postCollectionLabels[collection] ?? collection.replace(/-/g, ' ')
+}
+
+export function describePostCollection(collection: string) {
+  return postCollectionDecks[collection] ?? 'writing collection'
 }
 
 function slugifyHeading(title: string) {

@@ -437,22 +437,75 @@ const toggleTocGroup = (id: string) => {
   color: var(--tile-pink);
 }
 .post-body :deep(pre) {
+  position: relative;
   overflow-x: auto;
-  margin: 1.35rem 0;
-  padding: 1.15rem 1.2rem;
+  margin: 1.45rem 0;
+  padding: 3rem 1.25rem 1.2rem;
   border: 1px solid var(--hairline-dim);
+  border-left: 4px solid var(--mint);
   border-radius: 18px;
-  background: #0b0b0b;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent 3.05rem),
+    #090909;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 40px rgba(0, 0, 0, 0.24);
+  scrollbar-color: var(--mint) #171717;
+  scrollbar-width: thin;
+}
+.post-body :deep(pre::before) {
+  content: 'CODE';
+  position: absolute;
+  left: 1.15rem;
+  top: 0.95rem;
+  color: var(--text-meta);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+.post-body :deep(pre::after) {
+  content: '';
+  position: absolute;
+  right: 1.1rem;
+  top: 1.05rem;
+  width: 0.46rem;
+  height: 0.46rem;
+  border-radius: 999px;
+  background: var(--mint);
+  box-shadow:
+    -0.82rem 0 0 var(--tile-yellow),
+    -1.64rem 0 0 var(--tile-pink);
+}
+.post-body :deep(pre::-webkit-scrollbar) {
+  height: 10px;
+}
+.post-body :deep(pre::-webkit-scrollbar-track) {
+  background: #171717;
+  border-radius: 999px;
+}
+.post-body :deep(pre::-webkit-scrollbar-thumb) {
+  background: var(--mint);
+  border: 2px solid #171717;
+  border-radius: 999px;
 }
 .post-body :deep(pre code) {
   display: block;
   padding: 0;
-  color: var(--text-muted);
+  min-width: max-content;
+  color: #f3f3f3;
   background: transparent;
   border: 0;
   border-radius: 0;
-  line-height: 1.65;
+  font-size: 0.9rem;
+  line-height: 1.72;
+  tab-size: 2;
+  white-space: pre;
+}
+.post-body :deep(pre code .token.comment),
+.post-body :deep(pre code .token.prolog),
+.post-body :deep(pre code .token.doctype) {
+  color: var(--text-meta);
 }
 .post-body :deep(hr) {
   height: 1px;

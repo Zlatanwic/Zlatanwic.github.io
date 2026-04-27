@@ -1,30 +1,44 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { labelPostCollection, posts } from '../data/posts'
-
-type WritingTab = 'paper-notes' | 'tech' | 'misc'
+import { describePostCollection, labelPostCollection, posts } from '../data/posts'
 
 const searchQuery = ref('')
-const activeTab = ref<WritingTab>('paper-notes')
+const activeTab = ref('')
 const activeCategory = ref('ALL')
 
-const tabs: { id: WritingTab; label: string; deck: string }[] = [
-  { id: 'paper-notes', label: 'PAPER NOTES', deck: 'reading notes' },
-  { id: 'tech', label: 'TECH', deck: 'technical blogs' },
-  { id: 'misc', label: 'MISC', deck: 'logs & essays' }
-]
+const preferredCollectionOrder = ['paper-notes', 'tech', 'misc']
 
-const postsInTab = (tab: WritingTab) =>
+const tabs = computed(() =>
+  Array.from(new Set(posts.map(post => post.collection)))
+    .sort((a, b) => {
+      const aIndex = preferredCollectionOrder.indexOf(a)
+      const bIndex = preferredCollectionOrder.indexOf(b)
+      if (aIndex !== -1 || bIndex !== -1) {
+        return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex) -
+          (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex)
+      }
+      return labelPostCollection(a).localeCompare(labelPostCollection(b), 'zh-Hans-CN')
+    })
+    .map(collection => ({
+      id: collection,
+      label: labelPostCollection(collection),
+      deck: describePostCollection(collection)
+    }))
+)
+
+const activeCollection = computed(() => activeTab.value || tabs.value[0]?.id || '')
+
+const postsInTab = (tab: string) =>
   posts.filter(post => post.collection === tab)
 
 const categories = computed(() => [
   'ALL',
-  ...Array.from(new Set(postsInTab(activeTab.value).map(post => post.category)))
+  ...Array.from(new Set(postsInTab(activeCollection.value).map(post => post.category)))
 ])
 
 const filteredPosts = computed(() => {
-  let list = postsInTab(activeTab.value)
+  let list = postsInTab(activeCollection.value)
 
   if (activeCategory.value !== 'ALL') {
     list = list.filter(post => post.category === activeCategory.value)
@@ -48,17 +62,17 @@ const filteredPosts = computed(() => {
   return list
 })
 
-const switchTab = (tab: WritingTab) => {
+const switchTab = (tab: string) => {
   activeTab.value = tab
   activeCategory.value = 'ALL'
 }
 
-const tabCount = (tab: WritingTab) => postsInTab(tab).length
+const tabCount = (tab: string) => postsInTab(tab).length
 
 const categoryCount = (category: string) =>
   category === 'ALL'
-    ? postsInTab(activeTab.value).length
-    : postsInTab(activeTab.value).filter(post => post.category === category).length
+    ? postsInTab(activeCollection.value).length
+    : postsInTab(activeCollection.value).filter(post => post.category === category).length
 </script>
 
 <template>
@@ -99,8 +113,8 @@ const categoryCount = (category: string) =>
         type="button"
         class="tab"
         role="tab"
-        :aria-selected="activeTab === tab.id"
-        :class="{ 'is-active': activeTab === tab.id }"
+        :aria-selected="activeCollection === tab.id"
+        :class="{ 'is-active': activeCollection === tab.id }"
         @click="switchTab(tab.id)"
       >
         <span class="tab-label">{{ tab.label }}</span>
@@ -160,7 +174,7 @@ const categoryCount = (category: string) =>
       <p v-else class="empty">
         <span class="label-meta">
           NO MATCHING DISPATCHES
-          / {{ tabs.find(tab => tab.id === activeTab)?.label }}
+          / {{ tabs.find(tab => tab.id === activeCollection)?.label }}
           <template v-if="searchQuery"> / “{{ searchQuery }}”</template>
           YET.
         </span>
@@ -240,7 +254,7 @@ const categoryCount = (category: string) =>
 }
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 0.7rem;
   margin-top: clamp(1rem, 2vw, 1.5rem);
   padding-bottom: 1rem;
