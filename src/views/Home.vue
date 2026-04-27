@@ -17,7 +17,7 @@ interface Experience {
   role: Localized<string>
   place: Localized<string> | string
   summary: Localized<string>
-  bullets: Localized<string[]>
+  bullets?: Localized<string[]>
   tags: string[]
 }
 
@@ -139,6 +139,35 @@ const experiences: Experience[] = [
       ]
     },
     tags: ['RDMA', 'DISTRIBUTED FS', 'LLM SYSTEMS']
+  },
+  {
+    time: '2026.4 - now',
+    fill: 'mint',
+    role: {
+      zh: '研究实习 · LLM 推理系统',
+      en: 'Research Intern · LLM Inference Systems'
+    },
+    place: {
+      zh: '南京大学',
+      en: 'NJU'
+    },
+    summary: {
+      zh: '不同场景在kv cache管理。',
+      en: 'KV cache management in different situation.'
+    },
+    // bullets: {
+    //   zh: [
+    //     '分析 LLM 训练/推理中的 I/O pattern 和远端数据访问开销',
+    //     '调研 RDMA、缓存层和分布式文件系统的系统设计取舍',
+    //     '沉淀原型设计思路、模块边界和性能实验计划'
+    //   ],
+    //   en: [
+    //     'Analyzed I/O patterns and remote-data-access overhead in LLM workloads',
+    //     'Studied RDMA, caching layers, and distributed-filesystem design tradeoffs',
+    //     'Shaped prototype notes, module boundaries, and performance experiment plans'
+    //   ]
+    // },
+    tags: ['KV cache', 'agentic AI', 'LLM SYSTEMS']
   }
 ]
 
@@ -347,7 +376,7 @@ const isPdf = (path: string) => path.toLowerCase().endsWith('.pdf')
             </div>
             <h3 class="experience-title">{{ pick(item.role) }}</h3>
             <p class="experience-summary">{{ pick(item.summary) }}</p>
-            <ul class="experience-points">
+            <ul v-if="item.bullets" class="experience-points">
               <li v-for="point in arr(item.bullets)" :key="point">{{ point }}</li>
             </ul>
             <div class="experience-tags">
