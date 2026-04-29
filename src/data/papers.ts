@@ -113,6 +113,14 @@ export const papers: Paper[] = [
     status: 'reading',
     area:'agentic AI',
     noteSlug: 'aaacp'
+  },
+  {
+    title:'KVCOMM: Online Cross-context KV-cache Communication for Efficient LLM-based Multi-agent Systems',
+    url: 'https://arxiv.org/abs/2510.12872',
+    venue: 'nips 2026',
+    category: 'INFERENCE',
+    status: 'queued',
+    area: 'kv cache management'
   }
 ]
 

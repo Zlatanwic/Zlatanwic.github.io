@@ -140,21 +140,21 @@ const experiences: Experience[] = [
     },
     tags: ['RDMA', 'DISTRIBUTED FS', 'LLM SYSTEMS']
   },
-  {
-    time: '2026.4 - now',
-    fill: 'mint',
-    role: {
-      zh: '研究实习 · LLM 推理系统',
-      en: 'Research Intern · LLM Inference Systems'
-    },
-    place: {
-      zh: '南京大学',
-      en: 'NJU'
-    },
-    summary: {
-      zh: '不同场景在kv cache管理。',
-      en: 'KV cache management in different situation.'
-    },
+  //{
+   // time: '2026.4 - now',
+ //   fill: 'mint',
+ //   role: {
+ //     zh: '研究实习 · LLM 推理系统',
+  //    en: 'Research Intern · LLM Inference Systems'
+ //   },
+ //   place: {
+ //     zh: '南京大学',
+ //     en: 'NJU'
+  //  },
+  //  summary: {
+  //    zh: '不同场景在kv cache管理。',
+  //    en: 'KV cache management in different situation.'
+  //  },
     // bullets: {
     //   zh: [
     //     '分析 LLM 训练/推理中的 I/O pattern 和远端数据访问开销',
@@ -167,8 +167,8 @@ const experiences: Experience[] = [
     //     'Shaped prototype notes, module boundaries, and performance experiment plans'
     //   ]
     // },
-    tags: ['KV cache', 'agentic AI', 'LLM SYSTEMS']
-  }
+ //   tags: ['KV cache', 'agentic AI', 'LLM SYSTEMS']
+ // }
 ]
 
 const awards: Award[] = [
