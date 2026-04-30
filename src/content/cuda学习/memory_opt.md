@@ -1,3 +1,12 @@
+---
+title: "Memory Optimizations"
+date: "2026-04-26"
+category: "cuda memory"
+status: "draft"
+deck: ""
+fill: "mint"
+deploy: false
+---
 # Memory Optimizations
 memory 优化是cuda device优化中的很重要一环，用来优化bandwidth。意思是尽可能更多地访问快速内存而尽可能更少地访问慢速内存
 ## host与device之间的数据转移

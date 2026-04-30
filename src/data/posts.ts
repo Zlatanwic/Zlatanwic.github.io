@@ -127,6 +127,7 @@ interface PostFrontmatter {
   status?: PostStatus
   deck?: string
   fill?: PostFill
+  deploy?: boolean
 }
 
 const md = new MarkdownIt({
@@ -178,6 +179,11 @@ function parseFrontmatter(raw: string): { data: PostFrontmatter; content: string
     if (index === -1) continue
     const key = line.slice(0, index).trim() as keyof PostFrontmatter
     const value = line.slice(index + 1).trim().replace(/^["']|["']$/g, '')
+    if (key === 'deploy') {
+      data.deploy = value.toLowerCase() !== 'false'
+      continue
+    }
+
     if (key === 'title' || key === 'date' || key === 'category' || key === 'status' || key === 'deck' || key === 'fill') {
       data[key] = value as never
     }
@@ -236,10 +242,16 @@ function renderMarkdown(content: string, toc: PostTocItem[]) {
   return md.render(content, { toc })
 }
 
+function shouldIncludePost(data: PostFrontmatter) {
+  return !import.meta.env.PROD || data.deploy !== false
+}
+
 export const posts: Post[] = Object.entries(modules)
-  .map(([path, raw]) => {
+  .flatMap(([path, raw]) => {
     const parsed = parseFrontmatter(raw)
     const data = parsed.data
+    if (!shouldIncludePost(data)) return []
+
     const slug = slugFromPath(path)
     const collection = collectionFromPath(path)
     const date = data.date ?? '1970-01-01'
