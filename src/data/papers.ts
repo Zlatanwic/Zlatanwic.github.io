@@ -14,7 +14,7 @@
  * derives the list automatically.
  */
 export type PaperStatus = 'read' | 'reading' | 'queued'
-export type PaperCategory = 'INFERENCE' | 'DL COMPILER' | 'ARCHITECTURE' | 'ALGORITHM' | 'MISC'
+export type PaperCategory = 'INFERENCE' | 'DL COMPILER' | 'ARCHITECTURE' | 'ALGORITHM' | 'MISC' | 'AGENTIC AI'
 export const categoryOrder: PaperCategory[] = [
   'INFERENCE',
   'DL COMPILER',
@@ -121,6 +121,22 @@ export const papers: Paper[] = [
     category: 'INFERENCE',
     status: 'queued',
     area: 'kv cache management'
+  },
+  {
+    title:'Recursive Multi-Agent Systems',
+    url:'https://arxiv.org/abs/2604.25917',
+    venue: 'arxiv 2026',
+    status: 'queued',
+    category:'AGENTIC AI',
+    area: 'multi-agnent system'
+  },
+  {
+    title:'Hummingbird+: Advancing FPGA-based LLM Deployment from Research Prototype to Edge Product',
+    url:'https://dl.acm.org/doi/10.1145/3748173.3779189',
+    venue:'FPGA 2026',
+    status:'queued',
+    category:'ARCHITECTURE',
+    area: 'llm deploy'
   }
 ]
 
