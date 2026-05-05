@@ -20,6 +20,7 @@ export const categoryOrder: PaperCategory[] = [
   'DL COMPILER',
   'ARCHITECTURE',
   'ALGORITHM',
+  'AGENTIC AI',
   'MISC'
 ]
 
@@ -27,7 +28,7 @@ export interface Paper {
   title: string
   url?: string
   venue: string
-  category: PaperCategory
+  category: PaperCategory | PaperCategory[]
   area?: string
   status: PaperStatus
   takeaway?: string

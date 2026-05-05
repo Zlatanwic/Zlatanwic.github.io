@@ -13,18 +13,52 @@ const counts = {
   queued: papers.filter(p => p.status === 'queued').length
 }
 
-const categories: FilterCategory[] = ['ALL', ...categoryOrder]
+const paperCategories = (paper: Paper) =>
+  Array.isArray(paper.category) ? paper.category : [paper.category]
 
-const activeCategory = ref<FilterCategory>('ALL')
+const discoveredCategories = papers
+  .flatMap(paperCategories)
+  .filter((category): category is PaperCategory => !categoryOrder.includes(category))
+
+const categories: FilterCategory[] = [
+  'ALL',
+  ...categoryOrder,
+  ...Array.from(new Set(discoveredCategories)).sort((a, b) => a.localeCompare(b))
+]
+
+const selectedCategories = ref<PaperCategory[]>([])
 const activeStatus = ref<FilterStatus>('ALL')
 const searchQuery = ref('')
 
-// Two-stage filter: category narrows, then status narrows further.
-const filtered = computed(() => {
-  let list: Paper[] = papers
-  if (activeCategory.value !== 'ALL') {
-    list = list.filter(p => p.category === activeCategory.value)
+const hasCategoryFilter = computed(() => selectedCategories.value.length > 0)
+const selectedCategoryText = computed(() =>
+  hasCategoryFilter.value ? selectedCategories.value.join(' + ') : 'ALL'
+)
+
+const isCategoryActive = (cat: FilterCategory) =>
+  cat === 'ALL'
+    ? !hasCategoryFilter.value
+    : selectedCategories.value.includes(cat)
+
+const toggleCategory = (cat: FilterCategory) => {
+  if (cat === 'ALL') {
+    selectedCategories.value = []
+    return
   }
+
+  selectedCategories.value = selectedCategories.value.includes(cat)
+    ? selectedCategories.value.filter(active => active !== cat)
+    : [...selectedCategories.value, cat]
+}
+
+const matchesSelectedCategories = (paper: Paper) =>
+  !hasCategoryFilter.value ||
+  paperCategories(paper).some(category => selectedCategories.value.includes(category))
+
+// Multi-select category narrows first, then status and search narrow further.
+const filtered = computed(() => {
+  let list: Paper[] = papers.filter(matchesSelectedCategories)
+
   if (activeStatus.value !== 'ALL') {
     list = list.filter(p => p.status === activeStatus.value)
   }
@@ -34,7 +68,7 @@ const filtered = computed(() => {
       [
         p.title,
         p.venue,
-        p.category,
+        paperCategories(p).join(' '),
         p.area,
         p.takeaway,
         p.noteSlug,
@@ -53,14 +87,13 @@ const categoryCount = (cat: FilterCategory) => {
     activeStatus.value === 'ALL'
       ? papers
       : papers.filter(p => p.status === activeStatus.value)
-  return cat === 'ALL' ? base.length : base.filter(p => p.category === cat).length
+  return cat === 'ALL'
+    ? base.length
+    : base.filter(p => paperCategories(p).includes(cat)).length
 }
 
 const statusCount = (s: FilterStatus) => {
-  const base =
-    activeCategory.value === 'ALL'
-      ? papers
-      : papers.filter(p => p.category === activeCategory.value)
+  const base = papers.filter(matchesSelectedCategories)
   return s === 'ALL' ? base.length : base.filter(p => p.status === s).length
 }
 </script>
@@ -117,16 +150,15 @@ const statusCount = (s: FilterStatus) => {
     <!-- Category filter -->
     <nav class="filter" aria-label="Filter by category">
       <span class="kicker filter-label">CATEGORY /</span>
-      <div class="chips" role="tablist">
+      <div class="chips" role="group" aria-label="Category filters">
         <button
           v-for="cat in categories"
           :key="cat"
           type="button"
           class="chip"
-          role="tab"
-          :aria-selected="activeCategory === cat"
-          :class="{ 'is-active': activeCategory === cat }"
-          @click="activeCategory = cat"
+          :aria-pressed="isCategoryActive(cat)"
+          :class="{ 'is-active': isCategoryActive(cat) }"
+          @click="toggleCategory(cat)"
         >
           <span>{{ cat }}</span>
           <span class="chip-count">{{ categoryCount(cat) }}</span>
@@ -176,7 +208,13 @@ const statusCount = (s: FilterStatus) => {
       >
         <div class="paper-meta">
           <span class="dot" :class="p.status"></span>
-          <span class="tag tag--ghost cat-tag">{{ p.category }}</span>
+          <span
+            v-for="cat in paperCategories(p)"
+            :key="cat"
+            class="tag tag--ghost cat-tag"
+          >
+            {{ cat }}
+          </span>
           <span class="label-meta">{{ p.venue }}</span>
           <template v-if="p.area">
             <span class="sep">·</span>
@@ -211,7 +249,7 @@ const statusCount = (s: FilterStatus) => {
 
     <p v-else class="empty">
       <span class="label-meta">
-        NO PAPERS UNDER “{{ activeCategory }}” /
+        NO PAPERS UNDER “{{ selectedCategoryText }}” /
         “{{ activeStatus === 'ALL' ? 'ALL' : statusLabel[activeStatus] }}”
         <template v-if="searchQuery"> / “{{ searchQuery }}”</template>
         YET — 这个组合还没有论文。

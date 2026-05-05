@@ -109,6 +109,8 @@ export const postCollectionDecks: Record<string, string> = {
 export interface Post {
   slug: string
   collection: string
+  folder: string
+  sourcePath: string
   title: string
   date: string
   time: string
@@ -164,6 +166,29 @@ const modules = import.meta.glob<string>('../content/**/*.md', {
   eager: true
 })
 
+const contentAssets = import.meta.glob<string>(
+  '../content/**/*.{avif,gif,jpeg,jpg,png,svg,webp}',
+  {
+    query: '?url',
+    import: 'default',
+    eager: true
+  }
+)
+
+const defaultImage =
+  md.renderer.rules.image ??
+  ((tokens, idx, options, _env, self) => self.renderToken(tokens, idx, options))
+
+md.renderer.rules.image = (tokens, idx, options, env, self) => {
+  const sourcePath = typeof env.sourcePath === 'string' ? env.sourcePath : ''
+  const src = tokens[idx].attrGet('src')
+  if (src) {
+    tokens[idx].attrSet('src', resolveContentAsset(src, sourcePath))
+  }
+
+  return defaultImage(tokens, idx, options, env, self)
+}
+
 function parseFrontmatter(raw: string): { data: PostFrontmatter; content: string } {
   if (!raw.startsWith('---')) return { data: {}, content: raw }
 
@@ -198,6 +223,10 @@ function slugFromPath(path: string) {
 
 function collectionFromPath(path: string) {
   return path.match(/content\/([^/]+)\//)?.[1] ?? 'posts'
+}
+
+function folderFromPath(path: string) {
+  return path.match(/content\/(.+)\/[^/]+\.md$/)?.[1] ?? collectionFromPath(path)
 }
 
 export function labelPostCollection(collection: string) {
@@ -238,13 +267,53 @@ function formatTime(date: string) {
   return [year, month, day].filter(Boolean).join(' · ')
 }
 
-function renderMarkdown(content: string, toc: PostTocItem[]) {
-  return md.render(content, { toc })
+function isExternalOrRootPath(src: string) {
+  return /^(?:[a-z][a-z\d+.-]*:|\/\/|\/|#)/i.test(src)
+}
+
+function normalizeRelativePath(path: string) {
+  const parts: string[] = []
+
+  for (const part of path.replace(/\\/g, '/').split('/')) {
+    if (!part || part === '.') continue
+    if (part === '..' && parts.length && parts[parts.length - 1] !== '..') {
+      parts.pop()
+      continue
+    }
+    parts.push(part)
+  }
+
+  return parts.join('/')
+}
+
+function resolveContentAsset(src: string, sourcePath: string) {
+  if (!sourcePath || isExternalOrRootPath(src)) return src
+
+  const sourceDir = sourcePath.slice(0, sourcePath.lastIndexOf('/'))
+  const assetPath = normalizeRelativePath(`${sourceDir}/${src}`)
+  return contentAssets[assetPath] ?? src
+}
+
+function renderMarkdown(content: string, toc: PostTocItem[], sourcePath: string) {
+  return md.render(content, { toc, sourcePath })
 }
 
 function shouldIncludePost(data: PostFrontmatter) {
   return !import.meta.env.PROD || data.deploy !== false
 }
+
+function firstMarkdownHeading(content: string) {
+  const match = content.match(/^#\s+(.+)$/m)
+  return match?.[1].replace(/\s+#*$/, '').trim()
+}
+
+const postPathCollator = new Intl.Collator('zh-Hans-CN', {
+  numeric: true,
+  sensitivity: 'base'
+})
+
+const comparePostPath = (a: Post, b: Post) =>
+  postPathCollator.compare(a.sourcePath, b.sourcePath)
 
 export const posts: Post[] = Object.entries(modules)
   .flatMap(([path, raw]) => {
@@ -254,13 +323,16 @@ export const posts: Post[] = Object.entries(modules)
 
     const slug = slugFromPath(path)
     const collection = collectionFromPath(path)
+    const folder = folderFromPath(path)
     const date = data.date ?? '1970-01-01'
     const toc: PostTocItem[] = []
 
     return {
       slug,
       collection,
-      title: data.title ?? slug,
+      folder,
+      sourcePath: path,
+      title: data.title ?? firstMarkdownHeading(parsed.content) ?? slug,
       date,
       time: formatTime(date),
       category: data.category ?? 'NOTE',
@@ -268,11 +340,28 @@ export const posts: Post[] = Object.entries(modules)
       deck: data.deck ?? '',
       fill: data.fill ?? 'dark',
       toc,
-      html: renderMarkdown(parsed.content, toc)
+      html: renderMarkdown(parsed.content, toc, path)
     }
   })
   .sort((a, b) => b.date.localeCompare(a.date))
 
 export function findPost(slug: string) {
   return posts.find(post => post.slug === slug)
+}
+
+export function findAdjacentPosts(slug: string) {
+  const current = findPost(slug)
+  if (!current) return { previous: null, next: null }
+
+  const siblings = posts
+    .filter(post => post.folder === current.folder)
+    .sort(comparePostPath)
+  const currentIndex = siblings.findIndex(post => post.sourcePath === current.sourcePath)
+
+  return {
+    previous: currentIndex > 0 ? siblings[currentIndex - 1] : null,
+    next: currentIndex >= 0 && currentIndex < siblings.length - 1
+      ? siblings[currentIndex + 1]
+      : null
+  }
 }

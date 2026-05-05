@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import LocaleToggle from './LocaleToggle.vue'
 
 const tabs = [
   { to: '/', label: 'HOME' },
@@ -25,14 +26,17 @@ const tabs = [
           {{ t.label }}
         </RouterLink>
       </nav>
-      <a
-        class="cta"
-        href="https://github.com/Zlatanwic"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        FOLLOW ON GITHUB
-      </a>
+      <div class="nav-actions">
+        <LocaleToggle />
+        <a
+          class="cta"
+          href="https://github.com/Zlatanwic"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          FOLLOW ON GITHUB
+        </a>
+      </div>
     </div>
   </header>
 </template>
@@ -69,6 +73,11 @@ const tabs = [
   gap: 0.25rem;
   flex-wrap: wrap;
   margin-left: auto;
+}
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
 }
 .tab {
   position: relative;
@@ -123,6 +132,10 @@ const tabs = [
   }
   .cta {
     margin-left: auto;
+  }
+  .nav-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 </style>

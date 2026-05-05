@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { findPost, labelPostCollection } from '../data/posts'
+import { findAdjacentPosts, findPost, labelPostCollection } from '../data/posts'
 import type { PostTocItem } from '../data/posts'
 
 const route = useRoute()
 const post = computed(() => findPost(String(route.params.slug)))
+const adjacentPosts = computed(() => findAdjacentPosts(String(route.params.slug)))
 
 interface TocGroup {
   heading: PostTocItem
@@ -58,7 +59,37 @@ const toggleTocGroup = (id: string) => {
     </header>
 
     <div class="post-layout">
-      <section class="post-body" v-html="post.html" />
+      <div class="post-main">
+        <section class="post-body" v-html="post.html" />
+
+        <nav
+          v-if="adjacentPosts.previous || adjacentPosts.next"
+          class="post-pager"
+          aria-label="Adjacent chapters"
+        >
+          <RouterLink
+            v-if="adjacentPosts.previous"
+            class="pager-link pager-link--prev"
+            :to="{ name: 'post', params: { slug: adjacentPosts.previous.slug } }"
+          >
+            <span class="pager-eyebrow">PREVIOUS / 上一章</span>
+            <span class="pager-title">{{ adjacentPosts.previous.title }}</span>
+            <span class="pager-meta">{{ labelPostCollection(adjacentPosts.previous.collection) }}</span>
+          </RouterLink>
+          <span v-else class="pager-link pager-link--empty" aria-hidden="true" />
+
+          <RouterLink
+            v-if="adjacentPosts.next"
+            class="pager-link pager-link--next"
+            :to="{ name: 'post', params: { slug: adjacentPosts.next.slug } }"
+          >
+            <span class="pager-eyebrow">NEXT / 下一章</span>
+            <span class="pager-title">{{ adjacentPosts.next.title }}</span>
+            <span class="pager-meta">{{ labelPostCollection(adjacentPosts.next.collection) }}</span>
+          </RouterLink>
+          <span v-else class="pager-link pager-link--empty" aria-hidden="true" />
+        </nav>
+      </div>
 
       <aside v-if="tocGroups.length" class="post-toc" aria-label="Article headings">
         <span class="toc-kicker">ON THIS PAGE</span>
@@ -150,6 +181,9 @@ const toggleTocGroup = (id: string) => {
   gap: clamp(1.2rem, 3vw, 2.4rem);
   align-items: start;
 }
+.post-main {
+  min-width: 0;
+}
 .post-body {
   position: relative;
   margin-top: clamp(1.8rem, 3vw, 3rem);
@@ -163,6 +197,62 @@ const toggleTocGroup = (id: string) => {
   font-size: clamp(1rem, 0.98rem + 0.12vw, 1.08rem);
   line-height: 1.78;
   overflow: hidden;
+}
+.post-pager {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.95rem;
+}
+.pager-link {
+  min-width: 0;
+  min-height: 112px;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--hairline-dim);
+  border-radius: 18px;
+  background: var(--canvas);
+  display: grid;
+  align-content: center;
+  gap: 0.45rem;
+  color: var(--text);
+  transition: border-color var(--dur) var(--ease),
+    background var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+.pager-link:hover {
+  border-color: var(--mint);
+  background: rgba(255, 255, 255, 0.035);
+  transform: translateY(-2px);
+}
+.pager-link--next {
+  justify-items: end;
+  text-align: right;
+}
+.pager-link--empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+.pager-eyebrow,
+.pager-meta {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.pager-eyebrow {
+  color: var(--mint);
+}
+.pager-meta {
+  color: var(--text-meta);
+}
+.pager-title {
+  min-width: 0;
+  color: var(--text);
+  font-size: clamp(1rem, 0.9rem + 0.35vw, 1.2rem);
+  font-weight: 800;
+  line-height: 1.28;
+  overflow-wrap: anywhere;
 }
 .post-toc {
   position: sticky;
@@ -573,6 +663,16 @@ const toggleTocGroup = (id: string) => {
     margin-right: -0.25rem;
     padding: 1rem;
     border-radius: 18px;
+  }
+  .post-pager {
+    grid-template-columns: 1fr;
+  }
+  .pager-link--next {
+    justify-items: start;
+    text-align: left;
+  }
+  .pager-link--empty {
+    display: none;
   }
   .post-body :deep(h2::before) {
     width: 0.58rem;

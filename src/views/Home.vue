@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useLocale } from '../composables/useLocale'
 import type { Locale } from '../composables/useLocale'
 import { projects } from '../data/projects'
 import type { Localized } from '../data/projects'
 import { openSourceProjects } from '../data/openSourceProjects'
 import { publications } from '../data/publications'
-import LocaleToggle from '../components/LocaleToggle.vue'
 import GithubGrid from '../components/GithubGrid.vue'
 
 const { locale } = useLocale()
@@ -31,6 +30,12 @@ interface Award {
   tags: string[]
 }
 
+interface ResearchInterest {
+  title: Localized<string>
+  paragraphs: Localized<string[]>
+  tags: string[]
+}
+
 const i18n = {
   zh: {
     affil: '同济大学 · 大三 · AI SYSTEMS',
@@ -43,6 +48,12 @@ const i18n = {
     awardsTitle: '竞赛获奖',
     openSourceKicker: '开源',
     openSourceTitle: '参与的有趣开源项目',
+    researchKicker: 'RESEARCH',
+    researchTitle: '研究兴趣',
+    researchIntro:
+      '我的研究兴趣主要集中在 Machine Learning Systems（MLSys）方向，尤其关注如何通过系统、编译器、运行时和硬件协同优化，使深度学习模型能够在真实部署环境中实现更高效、更鲁棒、更可扩展的运行。',
+    researchToggleOpen: '展开全文',
+    researchToggleClose: '收起',
     publicationsKicker: '发表',
     publicationsTitle: '论文',
     workKicker: '代表项目',
@@ -59,6 +70,12 @@ const i18n = {
     awardsTitle: 'COMPETITION.LOG',
     openSourceKicker: 'OPEN SOURCE',
     openSourceTitle: 'INTERESTING PROJECTS',
+    researchKicker: 'RESEARCH',
+    researchTitle: 'RESEARCH INTERESTS',
+    researchIntro:
+      'My research interests mainly lie in Machine Learning Systems (MLSys), with a particular focus on improving the efficiency, robustness, and scalability of deep learning models in real-world deployment environments through the co-optimization of systems, compilers, runtimes, and hardware.',
+    researchToggleOpen: 'EXPAND',
+    researchToggleClose: 'COLLAPSE',
     publicationsKicker: 'PUBLICATIONS',
     publicationsTitle: 'PAPERS',
     workKicker: 'SELECTED WORK',
@@ -75,11 +92,117 @@ const i18n = {
   awardsTitle: string
   openSourceKicker: string
   openSourceTitle: string
+  researchKicker: string
+  researchTitle: string
+  researchIntro: string
+  researchToggleOpen: string
+  researchToggleClose: string
   publicationsKicker: string
   publicationsTitle: string
   workKicker: string
   workTitle: string
 }>
+
+const researchExpanded = ref(false)
+
+const researchOverview: Localized<string>[] = [
+  {
+    zh: 'MLSys 本身强调机器学习与系统设计的交叉，涵盖分布式计算、硬件加速、能效优化以及面向实际机器学习工作流的系统设计原则。',
+    en: 'MLSys emphasizes the intersection of machine learning and system design, covering topics such as distributed computing, hardware acceleration, energy efficiency optimization, and system design principles for practical machine learning workflows.'
+  },
+  {
+    zh: '这一方向也与我希望长期深耕的研究方向高度一致。',
+    en: 'This direction is highly aligned with the area in which I hope to conduct long-term research.'
+  }
+]
+
+const researchInterests: ResearchInterest[] = [
+  {
+    title: {
+      zh: '面向不同部署场景的大模型推理优化',
+      en: 'Large language model inference optimization for different deployment scenarios'
+    },
+    paragraphs: {
+      zh: [
+        '我对 LLM inference serving 中的内存管理、计算优化和长上下文效率问题非常感兴趣。当前大模型推理系统面临显著的 KV cache 内存瓶颈，而高吞吐、低延迟、低成本的推理服务已经成为实际部署中的关键问题。例如，vLLM 等系统通过高效的内存管理和服务引擎设计来提升 LLM serving 的吞吐与内存效率。',
+        '在这一方向上，我希望进一步研究资源受限场景下的大模型部署优化，包括端侧设备、RISC-V 平台以及低显存 GPU 环境中的量化、剪枝、KV cache 压缩、卸载与调度策略。',
+        '此外，我也在探索更细粒度、更具语义感知能力的推理优化方法。例如，在 Agent / RAG 等长上下文与多轮交互场景中，模型的注意力与知识使用往往具有明显的语义结构，因此可以设计语义感知的 KV retention / eviction 策略，以在有限缓存预算下保留对最终回答真正关键的信息。',
+        '这一方向也与我目前关于 KV cache eviction 的研究工作高度契合，后续我希望将其进一步系统化，面向更复杂的长上下文推理、RAG 检索增强生成以及 Agent 工作流进行扩展。',
+        '同时，随着 Mamba、Hybrid Attention-SSM 等新型序列建模架构的发展，推理系统中的缓存形态也不再局限于传统 Transformer 的 KV cache。Mamba 提出了 selective state space model，并强调线性序列长度扩展和硬件感知实现，这使得 State Cache / Hybrid Cache 的管理成为一个值得深入研究的新问题。因此，我也希望研究面向 Mamba / Hybrid 模型的状态缓存压缩、调度和跨硬件部署优化。'
+      ],
+      en: [
+        'I am highly interested in memory management, computation optimization, and long-context efficiency in LLM inference serving. Current large language model inference systems face significant KV cache memory bottlenecks, while high-throughput, low-latency, and cost-efficient inference serving has become a key challenge in real-world deployment. For example, systems such as vLLM improve the throughput and memory efficiency of LLM serving through efficient memory management and serving engine design.',
+        'Along this direction, I hope to further study deployment optimization for large language models under resource-constrained scenarios, including quantization, pruning, KV cache compression, offloading, and scheduling strategies on edge devices, RISC-V platforms, and GPUs with limited memory.',
+        'In addition, I am also exploring more fine-grained and semantically aware inference optimization methods. For example, in long-context and multi-turn interaction scenarios such as Agent and RAG applications, model attention and knowledge utilization often exhibit clear semantic structures. Therefore, it is possible to design semantically aware KV retention and eviction strategies to preserve information that is truly critical to the final response under a limited cache budget.',
+        'This direction is closely related to my current research on KV cache eviction. In the future, I hope to further systematize this work and extend it to more complex long-context inference, retrieval-augmented generation, and Agent workflows.',
+        'Meanwhile, with the development of new sequence modeling architectures such as Mamba and Hybrid Attention-SSM models, the form of cache in inference systems is no longer limited to the traditional KV cache used in Transformers. Mamba introduces selective state space models and emphasizes linear scaling with sequence length and hardware-aware implementation, making the management of State Cache and Hybrid Cache a promising research problem. Therefore, I also hope to investigate state cache compression, scheduling, and cross-hardware deployment optimization for Mamba and hybrid models.'
+      ]
+    },
+    tags: ['LLM SERVING', 'KV CACHE', 'LONG CONTEXT', 'EDGE AI']
+  },
+  {
+    title: {
+      zh: '深度学习编译器与软硬件协同优化',
+      en: 'Deep learning compilers and software-hardware co-optimization'
+    },
+    paragraphs: {
+      zh: [
+        '我对 DL compiler、kernel fusion、算子生成和异构硬件适配有浓厚兴趣。我的长期目标是探索如何通过编译优化、运行时调度和硬件特性感知，使不同类型的深度学习模型能够高效、稳定地运行在 GPU、端侧 NPU、RISC-V 加速器等多样化硬件平台上。',
+        '在工程经验方面，我已经具备一定的 CUDA 和 Triton 编程基础，曾尝试实现融合算子优化，并关注 GPU kernel 中的访存合并、线程组织、算子融合和半精度计算等性能问题。',
+        'Triton 作为面向深度学习 workload 的 GPU 编程与编译工具，为开发高性能自定义算子提供了更高层次的抽象，这也使我对“编译器如何连接模型表达与底层硬件性能”这一问题产生了更强兴趣。',
+        '后续我希望继续深入学习 TVM、Triton、MLIR、XLA 等系统，探索从图级优化、算子级优化到硬件后端代码生成的完整链路。'
+      ],
+      en: [
+        'I am also strongly interested in deep learning compilers, kernel fusion, operator generation, and heterogeneous hardware adaptation. My long-term goal is to explore how different types of deep learning models can run efficiently and reliably on diverse hardware platforms, such as GPUs, edge NPUs, and RISC-V accelerators, through compiler optimization, runtime scheduling, and hardware-aware design.',
+        'In terms of engineering experience, I have developed a foundation in CUDA and Triton programming. I have attempted to implement fused operator optimizations and have paid close attention to performance issues in GPU kernels, including memory coalescing, thread organization, operator fusion, and half-precision computation.',
+        'As a GPU programming and compilation tool designed for deep learning workloads, Triton provides a higher-level abstraction for developing high-performance custom operators. This has further strengthened my interest in the question of how compilers bridge model representation and low-level hardware performance.',
+        'In the future, I hope to continue studying systems such as TVM, Triton, MLIR, and XLA, and explore the full optimization pipeline from graph-level optimization and operator-level optimization to hardware backend code generation.'
+      ]
+    },
+    tags: ['CUDA', 'TRITON', 'TVM', 'MLIR', 'XLA']
+  },
+  {
+    title: {
+      zh: '面向深度学习的分布式训练与存算系统',
+      en: 'Distributed training and storage-computation systems for deep learning'
+    },
+    paragraphs: {
+      zh: [
+        '受 Hetu 等分布式深度学习系统的启发，我对大规模模型训练和推理中的分布式系统问题也非常感兴趣。随着模型规模和数据规模持续增长，单机优化已经难以满足实际需求，如何在多 GPU、多节点甚至异构集群中高效完成计算、通信、存储和调度，成为深度学习系统中的核心问题。',
+        '在这一方向上，我希望重点研究分布式并行策略、通信优化、图计算系统与深度学习框架之间的结合，包括数据并行、模型并行、流水线并行、张量并行、参数/状态分片、通信压缩以及存算协同调度等问题。',
+        '我目前正在系统阅读相关论文和开源项目，希望进一步理解深度学习 workload 的计算图结构、运行时调度机制以及底层通信与存储瓶颈，并在此基础上探索更高效的训练与推理系统设计。'
+      ],
+      en: [
+        'Inspired by distributed deep learning systems such as Hetu, I am also interested in distributed systems problems in large-scale model training and inference. As model and data scales continue to grow, single-machine optimization alone is no longer sufficient for real-world demands.',
+        'How to efficiently coordinate computation, communication, storage, and scheduling across multi-GPU, multi-node, and even heterogeneous clusters has become a core problem in deep learning systems.',
+        'Along this direction, I hope to focus on distributed parallelism strategies, communication optimization, and the integration of graph computing systems with deep learning frameworks. Relevant topics include data parallelism, model parallelism, pipeline parallelism, tensor parallelism, parameter and state sharding, communication compression, and storage-computation co-scheduling.',
+        'I am currently systematically reading related papers and open-source projects, hoping to better understand the computation graph structures, runtime scheduling mechanisms, and underlying communication and storage bottlenecks of deep learning workloads. Based on this understanding, I hope to explore more efficient training and inference system designs.'
+      ]
+    },
+    tags: ['DISTRIBUTED TRAINING', 'PARALLELISM', 'RUNTIME', 'STORAGE']
+  },
+  {
+    title: {
+      zh: '面向前沿 Agent 系统的基础设施',
+      en: 'Infrastructure for frontier Agent systems'
+    },
+    paragraphs: {
+      zh: [
+        '我也关注面向 Agentic AI 的系统基础设施建设。随着大模型逐渐从单轮问答走向工具调用、多 Agent 协作、长期记忆、代码执行和复杂任务规划，系统层面需要提供更可靠的 sandbox、状态管理、权限隔离、工具调度、任务恢复和资源控制机制。',
+        '相比单纯提升模型能力，我认为构建安全、高效、可观测、可扩展的 Agent runtime 同样是未来 AI Systems 中非常重要的方向。',
+        '因此，我希望进一步研究 Agent sandbox、工具执行环境、长程任务调度、RAG/Memory 系统、上下文压缩与恢复机制，以及多 Agent 协作中的通信与资源管理问题。',
+        '长期来看，我希望能够从模型推理优化、编译器与运行时系统、分布式存算系统以及 Agent 基础设施等多个层面，构建面向真实应用场景的高效、鲁棒、可扩展的深度学习系统。'
+      ],
+      en: [
+        'I am also interested in infrastructure for Agentic AI systems. As large language models gradually evolve from single-turn question answering toward tool use, multi-agent collaboration, long-term memory, code execution, and complex task planning, system-level infrastructure needs to provide more reliable sandboxing, state management, permission isolation, tool scheduling, task recovery, and resource control.',
+        'Compared with simply improving model capability, I believe that building safe, efficient, observable, and scalable Agent runtimes will also become an important direction in future AI Systems research.',
+        'Therefore, I hope to further study Agent sandboxes, tool execution environments, long-horizon task scheduling, RAG and memory systems, context compression and recovery mechanisms, as well as communication and resource management in multi-agent collaboration.',
+        'In the long term, I hope to build efficient, robust, and scalable deep learning systems for real-world applications from multiple levels, including model inference optimization, compilers and runtime systems, distributed storage-computation systems, and Agent infrastructure.'
+      ]
+    },
+    tags: ['AGENT RUNTIME', 'SANDBOX', 'RAG', 'MEMORY SYSTEMS']
+  }
+]
 
 const experiences: Experience[] = [
   {
@@ -239,10 +362,6 @@ const isPdf = (path: string) => path.toLowerCase().endsWith('.pdf')
 
 <template>
   <article>
-    <div class="locale-bar">
-      <LocaleToggle />
-    </div>
-
     <header class="masthead">
       <span class="kicker kicker-uv">{{ tt.affil }}</span>
       <h1 class="display display-hero wordmark">
@@ -253,6 +372,66 @@ const isPdf = (path: string) => path.toLowerCase().endsWith('.pdf')
     </header>
 
     <GithubGrid :locale="locale" />
+
+    <hr class="rule" />
+
+    <section class="research-section">
+      <div class="section-head research-head">
+        <div>
+          <span class="kicker kicker-uv">{{ tt.researchKicker }}</span>
+          <h2 class="display display-lg">{{ tt.researchTitle }}</h2>
+        </div>
+        <button
+          class="research-toggle"
+          type="button"
+          :aria-expanded="researchExpanded"
+          aria-controls="research-panel"
+          @click="researchExpanded = !researchExpanded"
+        >
+          <span>{{ researchExpanded ? tt.researchToggleClose : tt.researchToggleOpen }}</span>
+          <span class="toggle-mark" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <article class="research-card" :class="{ 'is-open': researchExpanded }">
+        <p class="research-lede">{{ tt.researchIntro }}</p>
+        <div class="research-overview">
+          <p v-for="paragraph in researchOverview" :key="String(pick(paragraph))">{{ pick(paragraph) }}</p>
+        </div>
+        <div class="research-tags">
+          <span
+            v-for="interest in researchInterests"
+            :key="String(pick(interest.title))"
+            class="tag tag--ghost"
+          >
+            {{ interest.tags[0] }}
+          </span>
+        </div>
+
+        <div
+          id="research-panel"
+          class="research-panel"
+          :aria-hidden="!researchExpanded"
+        >
+          <div class="research-panel-inner">
+            <article
+              v-for="(interest, index) in researchInterests"
+              :key="String(pick(interest.title))"
+              class="research-topic"
+            >
+              <span class="research-index label-meta">{{ String(index + 1).padStart(2, '0') }}</span>
+              <div class="research-topic-copy">
+                <h3>{{ pick(interest.title) }}</h3>
+                <p v-for="paragraph in arr(interest.paragraphs)" :key="paragraph">{{ paragraph }}</p>
+                <div class="research-topic-tags">
+                  <span v-for="tag in interest.tags" :key="tag" class="tag tag--ghost">{{ tag }}</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </article>
+    </section>
 
     <hr class="rule" />
 
@@ -465,12 +644,6 @@ const isPdf = (path: string) => path.toLowerCase().endsWith('.pdf')
 </template>
 
 <style scoped>
-.locale-bar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 0.6rem;
-}
-
 .masthead {
   padding: clamp(1.5rem, 2vw, 3rem) 0 clamp(1.5rem, 2vw, 2.5rem);
   border-bottom: 1px solid var(--hairline-dim);
@@ -502,6 +675,148 @@ const isPdf = (path: string) => path.toLowerCase().endsWith('.pdf')
 .section-head h2 {
   margin: 0;
   letter-spacing: 0.005em;
+}
+
+.research-head {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+.research-head > div {
+  display: grid;
+  gap: 0.6rem;
+}
+.research-toggle {
+  appearance: none;
+  border: 1px solid var(--mint);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mint);
+  min-height: 2.65rem;
+  padding: 0.7rem 1rem 0.7rem 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease),
+    color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.research-toggle:hover,
+.research-toggle:focus-visible {
+  background: var(--mint);
+  color: var(--black);
+  outline: none;
+}
+.toggle-mark {
+  width: 0.7rem;
+  height: 0.7rem;
+  position: relative;
+  flex: 0 0 auto;
+}
+.toggle-mark::before,
+.toggle-mark::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: translateY(-50%);
+  transition: transform var(--dur) var(--ease);
+}
+.toggle-mark::after {
+  transform: translateY(-50%) rotate(90deg);
+}
+.research-toggle[aria-expanded='true'] .toggle-mark::after {
+  transform: translateY(-50%) rotate(0deg);
+}
+.research-card {
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  background: var(--canvas);
+  padding: clamp(1.1rem, 2vw, 1.6rem);
+  transition: border-color var(--dur) var(--ease);
+}
+.research-card:hover,
+.research-card.is-open {
+  border-color: var(--mint);
+}
+.research-lede {
+  margin: 0;
+  max-width: 82ch;
+  color: var(--text);
+  font-size: clamp(1.15rem, 1rem + 0.7vw, 1.55rem);
+  line-height: 1.45;
+  font-weight: 650;
+}
+.research-overview {
+  display: grid;
+  gap: 0.65rem;
+  max-width: 84ch;
+  margin-top: 1rem;
+}
+.research-overview p,
+.research-topic p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.68;
+}
+.research-tags,
+.research-topic-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.research-tags {
+  margin-top: 1.15rem;
+}
+.research-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 520ms var(--ease),
+    opacity 260ms var(--ease), margin-top 520ms var(--ease);
+}
+.research-card.is-open .research-panel {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-top: 1.35rem;
+}
+.research-panel-inner {
+  overflow: hidden;
+  display: grid;
+  gap: 1rem;
+}
+.research-topic {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--hairline-dim);
+}
+.research-index {
+  color: var(--mint);
+  padding-top: 0.25rem;
+}
+.research-topic-copy {
+  display: grid;
+  gap: 0.75rem;
+}
+.research-topic h3 {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: clamp(1.18rem, 1rem + 0.8vw, 1.75rem);
+  line-height: 1.12;
+}
+.research-topic-tags {
+  margin-top: 0.25rem;
 }
 
 .grid {
@@ -1075,6 +1390,21 @@ const isPdf = (path: string) => path.toLowerCase().endsWith('.pdf')
 }
 
 @media (max-width: 720px) {
+  .research-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .research-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .research-topic {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+  .research-index {
+    padding-top: 0;
+  }
   .publication-card {
     grid-template-columns: 1fr;
   }
