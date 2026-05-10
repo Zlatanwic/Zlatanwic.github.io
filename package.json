@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "vue-tsc --noEmit",
-    "prebuild": "tsx scripts/fetch-contributions.ts",
+    "fetch:zotero": "tsx scripts/fetch-zotero-papers.ts",
+    "prebuild": "tsx scripts/fetch-zotero-papers.ts && tsx scripts/fetch-contributions.ts",
     "build": "vite build",
     "preview": "vite preview"
   },

@@ -11,6 +11,7 @@ export interface Publication {
   architectureAlt: Localized<string>
   tags: string[]
   url?: string
+  deckSlug?: string
 }
 
 export const publications: Publication[] = [
@@ -37,7 +38,8 @@ export const publications: Publication[] = [
       zh: 'SIEVEKV 架构图：从长上下文输入提取五维语义信号，并生成 KV cache 保留决策。',
       en: 'SIEVEKV architecture: five semantic signals are extracted from long-context input to produce KV cache retention decisions.'
     },
-    tags: ['ORAL', 'KV CACHE', 'LLM INFERENCE', 'LONG CONTEXT']
+    tags: ['ORAL', 'KV CACHE', 'LLM INFERENCE', 'LONG CONTEXT'],
+    deckSlug: 'sievekv'
   }
 ]
 

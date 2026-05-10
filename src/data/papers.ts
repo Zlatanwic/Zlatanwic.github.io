@@ -1,3 +1,5 @@
+import zoteroCache from './generated/zotero-papers.json'
+
 /**
  * Reading list — single source of truth.
  *
@@ -7,16 +9,16 @@
  *   venue    string  — UPPERCASE venue + year, e.g. 'NEURIPS 2024'
  *   category string  — top-level filter bucket, UPPERCASE (drives the chip bar)
  *   area     string  — fine-grained sub-area, UPPERCASE (display only); optional
- *   status   'read' | 'reading' | 'queued'
+ *   status   'deep-read' | 'skim-read' | 'reading' | 'queued'
  *   takeaway string  — one-line "what it solved / what it left behind"; optional
  *
  * Adding a new category: just type a new value in `category`. The chip bar
  * derives the list automatically.
  */
-export type PaperStatus = 'read' | 'reading' | 'queued'
-export type PaperCategory = 'INFERENCE' | 'DL COMPILER' | 'ARCHITECTURE' | 'ALGORITHM' | 'MISC' | 'AGENTIC AI'
+export type PaperStatus = 'deep-read' | 'skim-read' | 'reading' | 'queued'
+export type PaperCategory = string
 export const categoryOrder: PaperCategory[] = [
-  'INFERENCE',
+  'MLSYS',
   'DL COMPILER',
   'ARCHITECTURE',
   'ALGORITHM',
@@ -33,16 +35,17 @@ export interface Paper {
   status: PaperStatus
   takeaway?: string
   noteSlug?: string
+  zoteroKey?: string
 }
 
-export const papers: Paper[] = [
+const manualPapers: Paper[] = [
   {
     title: 'SnapKV: LLM Knows What You are Looking for Before Generation',
     url: 'https://arxiv.org/abs/2404.14469',
     venue: 'NEURIPS 2024',
-    category: 'INFERENCE',
+    category: 'MLSYS',
     area: 'KV CACHE',
-    status: 'read',
+    status: 'deep-read',
     noteSlug: 'kv-cache-eviction',
     takeaway:
       '基于 prompt 末段窗口 vote 出关注的 token 位置——简单但偏向 recency；长上下文检索任务上掉得很快。'
@@ -51,9 +54,9 @@ export const papers: Paper[] = [
     title: 'H2O: Heavy-Hitter Oracle for Efficient Generative Inference of LLMs',
     url: 'https://arxiv.org/abs/2306.14048',
     venue: 'NEURIPS 2023',
-    category: 'INFERENCE',
+    category: 'MLSYS',
     area: 'KV CACHE',
-    status: 'read',
+    status: 'deep-read',
     noteSlug: 'kv-cache-eviction',
     takeaway:
       '“近期 + 累积注意力大者” 的两段式保留，奠定后续 eviction 工作的常见 baseline 形态。'
@@ -62,9 +65,9 @@ export const papers: Paper[] = [
     title: 'Efficient Memory Management for Large Language Model Serving with PagedAttention',
     url: 'https://arxiv.org/abs/2309.06180',
     venue: 'SOSP 2023',
-    category: 'INFERENCE',
+    category: 'MLSYS',
     area: 'LLM SERVING',
-    status: 'read',
+    status: 'deep-read',
     takeaway:
       '把虚拟内存的分页观念搬到 KV cache：碎片消失，共享前缀几乎免费。kernel 设计是真正的工程亮点。'
   },
@@ -74,7 +77,7 @@ export const papers: Paper[] = [
     venue: 'ARXIV 2023',
     category: 'ALGORITHM',
     area: 'ATTENTION KERNEL',
-    status: 'read',
+    status: 'deep-read',
     takeaway:
       'work partition、warp 调度比 V1 更激进；理解它之后再看 paged 变体会顺很多。'
   },
@@ -102,15 +105,15 @@ export const papers: Paper[] = [
     title: 'FLASHINFER: EFFICIENT AND CUSTOMIZABLE ATTENTION ENGINE FOR LLMINFERENCE SERVING',
     url: 'https://arxiv.org/abs/2511.00739',
     venue: 'MLSys 2025',
-    category: 'INFERENCE',
+    category: 'MLSYS',
     area: 'mlsys fullstack',
-    status:'read'
+    status:'deep-read'
   },
   {
     title: 'Towards Understanding, Analyzing, and Optimizing Agentic AI Execution: A CPU-Centric Perspective',
     url: 'https://arxiv.org/abs/2511.00739',
     venue: 'arxiv 2026',
-    category: 'INFERENCE',
+    category: 'MLSYS',
     status: 'reading',
     area:'agentic AI',
     noteSlug: 'aaacp'
@@ -119,7 +122,7 @@ export const papers: Paper[] = [
     title:'KVCOMM: Online Cross-context KV-cache Communication for Efficient LLM-based Multi-agent Systems',
     url: 'https://arxiv.org/abs/2510.12872',
     venue: 'nips 2026',
-    category: 'INFERENCE',
+    category: 'MLSYS',
     status: 'queued',
     area: 'kv cache management'
   },
@@ -141,10 +144,35 @@ export const papers: Paper[] = [
   }
 ]
 
+const generatedPapers = (zoteroCache.papers ?? []) as Paper[]
+
+function paperKey(paper: Paper) {
+  return (paper.zoteroKey || paper.title).trim().toLowerCase()
+}
+
+function mergePapers(primary: Paper[], overrides: Paper[]) {
+  const merged = new Map<string, Paper>()
+
+  for (const paper of primary) {
+    merged.set(paperKey(paper), paper)
+  }
+
+  for (const paper of overrides) {
+    const key = paperKey(paper)
+    const existing = merged.get(key)
+    merged.set(key, existing ? { ...existing, ...paper } : paper)
+  }
+
+  return Array.from(merged.values())
+}
+
+export const papers: Paper[] = mergePapers(generatedPapers, manualPapers)
+
 export const statusLabel: Record<PaperStatus, string> = {
-  read: '已读',
+  'deep-read': '已精读',
+  'skim-read': '已略读',
   reading: '在读',
   queued: '待读'
 }
 
-export const statusOrder: PaperStatus[] = ['read', 'reading', 'queued']
+export const statusOrder: PaperStatus[] = ['deep-read', 'skim-read', 'reading', 'queued']

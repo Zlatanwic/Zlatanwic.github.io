@@ -1,0 +1,86 @@
+{
+  "fetchedAt": "2026-05-09T14:23:46.751Z",
+  "libraryVersion": "89",
+  "source": {
+    "libraryType": "user",
+    "libraryId": "20298700",
+    "collectionKey": "",
+    "tag": ""
+  },
+  "papers": [
+    {
+      "title": "BOute: Cost-Efficient LLM Serving with Heterogeneous LLMs and GPUs via Multi-Objective Bayesian Optimization",
+      "url": "http://arxiv.org/abs/2602.10729",
+      "venue": "MLSYS 2026",
+      "category": "MLSYS",
+      "area": "LLM SERVING",
+      "status": "deep-read",
+      "takeaway": "用最优化理论解决模型路由异构和模型部署异构的co-design问题",
+      "zoteroKey": "HSVDQH94"
+    },
+    {
+      "title": "Practical Bayesian Optimization of Machine Learning Algorithms",
+      "url": "http://arxiv.org/abs/1206.2944",
+      "venue": "ARXIV 2012",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "T2PA5JQQ"
+    },
+    {
+      "title": "AlpaServe: Statistical Multiplexing with Model Parallelism for Deep Learning Serving",
+      "url": "http://arxiv.org/abs/2302.11665",
+      "venue": "ARXIV 2023",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "NYA36UZQ"
+    },
+    {
+      "title": "Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism",
+      "url": "http://arxiv.org/abs/1909.08053",
+      "venue": "ARXIV 2020",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "YXPRX7HV"
+    },
+    {
+      "title": "GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism",
+      "url": "http://arxiv.org/abs/1811.06965",
+      "venue": "ARXIV 2019",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "UT5W7L9Y"
+    },
+    {
+      "title": "ThunderServe: High-performance and Cost-efficient LLM Serving in Cloud Environments",
+      "url": "http://arxiv.org/abs/2502.09334",
+      "venue": "ARXIV 2025",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "XRQS3GJH"
+    },
+    {
+      "title": "ThunderServe: High-performance and Cost-efficient LLM Serving in Cloud Environments",
+      "url": "http://arxiv.org/abs/2502.09334",
+      "venue": "ARXIV 2025",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "GMDV5EKD"
+    },
+    {
+      "title": "SkVM: Revisiting Language VM for Skills across Heterogenous LLMs and Harnesses",
+      "url": "http://arxiv.org/abs/2604.03088",
+      "venue": "ARXIV 2026",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "8LDMDJ2X"
+    },
+    {
+      "title": "PQCache: Product Quantization-based KVCache for Long Context LLM Inference",
+      "url": "https://dl.acm.org/doi/10.1145/3725338",
+      "venue": "PROCEEDINGS OF THE ACM ON MANAGEMENT OF DATA 2025",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "PXIMEIZK"
+    }
+  ]
+}

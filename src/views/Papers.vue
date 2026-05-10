@@ -7,11 +7,9 @@ import type { Paper, PaperCategory, PaperStatus } from '../data/papers'
 type FilterStatus = 'ALL' | PaperStatus
 type FilterCategory = 'ALL' | PaperCategory
 
-const counts = {
-  read: papers.filter(p => p.status === 'read').length,
-  reading: papers.filter(p => p.status === 'reading').length,
-  queued: papers.filter(p => p.status === 'queued').length
-}
+const counts = Object.fromEntries(
+  statusOrder.map(status => [status, papers.filter(p => p.status === status).length])
+) as Record<PaperStatus, number>
 
 const paperCategories = (paper: Paper) =>
   Array.isArray(paper.category) ? paper.category : [paper.category]
@@ -108,20 +106,14 @@ const statusCount = (s: FilterStatus) => {
       </p>
 
       <div class="stats">
-        <div class="stat">
-          <span class="dot read"></span>
-          <span class="label-meta">已读</span>
-          <span class="num">{{ counts.read }}</span>
-        </div>
-        <div class="stat">
-          <span class="dot reading"></span>
-          <span class="label-meta">在读</span>
-          <span class="num">{{ counts.reading }}</span>
-        </div>
-        <div class="stat">
-          <span class="dot queued"></span>
-          <span class="label-meta">待读</span>
-          <span class="num">{{ counts.queued }}</span>
+        <div
+          v-for="status in statusOrder"
+          :key="status"
+          class="stat"
+        >
+          <span class="dot" :class="status"></span>
+          <span class="label-meta">{{ statusLabel[status] }}</span>
+          <span class="num">{{ counts[status] }}</span>
         </div>
       </div>
     </header>
@@ -291,7 +283,8 @@ const statusCount = (s: FilterStatus) => {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.dot.read { background: var(--mint); }
+.dot.deep-read { background: var(--mint); }
+.dot.skim-read { background: var(--hover-blue); }
 .dot.reading { background: var(--tile-yellow); }
 .dot.queued {
   background: var(--canvas);
@@ -412,6 +405,11 @@ const statusCount = (s: FilterStatus) => {
   border-color: var(--mint);
   color: var(--black);
 }
+.chip[data-status='skim-read'].is-active {
+  background: var(--hover-blue);
+  border-color: var(--hover-blue);
+  color: var(--black);
+}
 .chip[data-status='reading'].is-active {
   background: var(--tile-yellow);
   border-color: var(--tile-yellow);
@@ -427,7 +425,8 @@ const statusCount = (s: FilterStatus) => {
   height: 8px;
   border-radius: 50%;
 }
-.chip-dot.read { background: var(--mint); }
+.chip-dot.deep-read { background: var(--mint); }
+.chip-dot.skim-read { background: var(--hover-blue); }
 .chip-dot.reading { background: var(--tile-yellow); }
 .chip-dot.queued {
   background: var(--canvas);
@@ -455,6 +454,9 @@ const statusCount = (s: FilterStatus) => {
 .chip[data-status='reading'].is-active .chip-count {
   color: var(--tile-yellow);
 }
+.chip[data-status='skim-read'].is-active .chip-count {
+  color: var(--hover-blue);
+}
 
 /* ---- Papers list ---- */
 .papers {
@@ -476,9 +478,10 @@ const statusCount = (s: FilterStatus) => {
   transform: translateX(4px);
   border-left-color: var(--mint);
 }
-.paper[data-status='read']    { border-left-color: var(--mint); }
-.paper[data-status='reading'] { border-left-color: var(--tile-yellow); }
-.paper[data-status='queued']  { border-left-color: var(--text-meta); }
+.paper[data-status='deep-read'] { border-left-color: var(--mint); }
+.paper[data-status='skim-read'] { border-left-color: var(--hover-blue); }
+.paper[data-status='reading']  { border-left-color: var(--tile-yellow); }
+.paper[data-status='queued']   { border-left-color: var(--text-meta); }
 
 .paper-meta {
   display: inline-flex;
@@ -498,6 +501,7 @@ const statusCount = (s: FilterStatus) => {
 .status-tag {
   color: var(--mint);
 }
+.paper[data-status='skim-read'] .status-tag { color: var(--hover-blue); }
 .paper[data-status='reading'] .status-tag { color: var(--tile-yellow); }
 .paper[data-status='queued'] .status-tag { color: var(--text-meta); }
 
