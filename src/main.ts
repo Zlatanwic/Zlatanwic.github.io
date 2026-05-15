@@ -6,7 +6,6 @@ import Writing from './views/Writing.vue'
 import Post from './views/Post.vue'
 import Papers from './views/Papers.vue'
 import Likes from './views/Likes.vue'
-import SlideDeck from './views/SlideDeck.vue'
 import 'katex/dist/katex.min.css'
 import './styles/global.css'
 
@@ -16,7 +15,6 @@ const router = createRouter({
     { path: '/', name: 'home', component: Home, meta: { title: 'Home' } },
     { path: '/writing', name: 'writing', component: Writing, meta: { title: 'Writing' } },
     { path: '/writing/:slug', name: 'post', component: Post, meta: { title: 'Post' } },
-    { path: '/slides/:slug', name: 'slides', component: SlideDeck, meta: { title: 'Slides' } },
     { path: '/papers', name: 'papers', component: Papers, meta: { title: 'Reading Papers' } },
     { path: '/likes', name: 'likes', component: Likes, meta: { title: 'Likes' } },
     { path: '/:pathMatch(.*)*', redirect: '/' }

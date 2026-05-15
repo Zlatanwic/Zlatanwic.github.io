@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
 import { useLocale } from '../composables/useLocale'
 import type { Locale } from '../composables/useLocale'
 import { projects } from '../data/projects'
@@ -10,7 +9,6 @@ import { publications } from '../data/publications'
 import GithubGrid from '../components/GithubGrid.vue'
 
 const { locale } = useLocale()
-const router = useRouter()
 
 interface Experience {
   time: string
@@ -360,17 +358,6 @@ const pick = <T,>(val: Localized<T> | T) =>
     : val
 const arr = <T,>(val: T[] | Localized<T[]>) => (Array.isArray(val) ? val : val[locale.value])
 const isPdf = (path: string) => path.toLowerCase().endsWith('.pdf')
-const openPublicationDeck = (deckSlug?: string) => {
-  if (deckSlug) {
-    router.push({ name: 'slides', params: { slug: deckSlug } })
-  }
-}
-
-const handlePublicationKeydown = (event: KeyboardEvent, deckSlug?: string) => {
-  if (!deckSlug || (event.key !== 'Enter' && event.key !== ' ')) return
-  event.preventDefault()
-  openPublicationDeck(deckSlug)
-}
 </script>
 
 <template>
@@ -458,11 +445,6 @@ const handlePublicationKeydown = (event: KeyboardEvent, deckSlug?: string) => {
           v-for="paper in publications"
           :key="paper.title"
           class="publication-card"
-          :class="{ 'publication-card--clickable': paper.deckSlug }"
-          :tabindex="paper.deckSlug ? 0 : undefined"
-          :role="paper.deckSlug ? 'link' : undefined"
-          @click="openPublicationDeck(paper.deckSlug)"
-          @keydown="handlePublicationKeydown($event, paper.deckSlug)"
         >
           <div class="publication-copy">
             <div class="publication-meta">
@@ -470,19 +452,11 @@ const handlePublicationKeydown = (event: KeyboardEvent, deckSlug?: string) => {
               <span class="label-meta">{{ pick(paper.status) }}</span>
             </div>
             <h3 class="publication-title">
-              <RouterLink
-                v-if="paper.deckSlug"
-                :to="{ name: 'slides', params: { slug: paper.deckSlug } }"
-                @click.stop
-              >
-                {{ paper.title }}
-              </RouterLink>
               <a
-                v-else-if="paper.url"
+                v-if="paper.url"
                 :href="paper.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                @click.stop
               >
                 {{ paper.title }}
               </a>
@@ -490,26 +464,6 @@ const handlePublicationKeydown = (event: KeyboardEvent, deckSlug?: string) => {
             </h3>
             <p class="publication-authors">{{ pick(paper.authors) }}</p>
             <p class="publication-summary">{{ pick(paper.summary) }}</p>
-            <div v-if="paper.deckSlug || paper.url" class="publication-actions">
-              <RouterLink
-                v-if="paper.deckSlug"
-                class="publication-action"
-                :to="{ name: 'slides', params: { slug: paper.deckSlug } }"
-                @click.stop
-              >
-                OPEN SLIDES
-              </RouterLink>
-              <a
-                v-if="paper.url"
-                class="publication-action"
-                :href="paper.url"
-                target="_blank"
-                rel="noopener noreferrer"
-                @click.stop
-              >
-                OPEN PAPER
-              </a>
-            </div>
             <div class="publication-tags">
               <span v-for="tag in paper.tags" :key="tag" class="tag tag--ghost">{{ tag }}</span>
             </div>
@@ -889,14 +843,6 @@ const handlePublicationKeydown = (event: KeyboardEvent, deckSlug?: string) => {
 .publication-card:hover {
   border-color: var(--mint);
 }
-.publication-card--clickable {
-  cursor: pointer;
-}
-.publication-card--clickable:focus-visible {
-  border-color: var(--mint);
-  outline: 2px solid var(--focus-cyan);
-  outline-offset: 3px;
-}
 .publication-copy {
   display: flex;
   flex-direction: column;
@@ -940,27 +886,6 @@ const handlePublicationKeydown = (event: KeyboardEvent, deckSlug?: string) => {
   color: var(--text-muted);
   line-height: 1.6;
   max-width: 62ch;
-}
-.publication-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-}
-.publication-action {
-  width: fit-content;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--mint);
-  border-bottom: 1px solid transparent;
-}
-.publication-action:hover,
-.publication-action:focus-visible {
-  color: var(--hover-blue);
-  border-bottom-color: var(--hover-blue);
-  outline: none;
 }
 .publication-tags {
   display: flex;

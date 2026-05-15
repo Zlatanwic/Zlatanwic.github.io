@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-05-09T14:23:46.751Z",
-  "libraryVersion": "89",
+  "fetchedAt": "2026-05-15T09:18:46.432Z",
+  "libraryVersion": "124",
   "source": {
     "libraryType": "user",
     "libraryId": "20298700",
@@ -8,6 +8,46 @@
     "tag": ""
   },
   "papers": [
+    {
+      "title": "Hydraulis: Balancing Large Transformer Model Training via Co-designing Parallel Strategies and Data Assignment",
+      "url": "http://arxiv.org/abs/2412.07894",
+      "venue": "PROCEEDINGS OF THE ACM ON MANAGEMENT OF DATA 2025",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "JF5H8ADR"
+    },
+    {
+      "title": "Crab: A Semantics-Aware Checkpoint/Restore Runtime for Agent Sandboxes",
+      "url": "http://arxiv.org/abs/2604.28138",
+      "venue": "ARXIV 2026",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "I24SIJBJ"
+    },
+    {
+      "title": "A Modern Primer on Processing in Memory",
+      "url": "http://arxiv.org/abs/2012.03112",
+      "venue": "ARXIV 2025",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "WERTZ5FE"
+    },
+    {
+      "title": "Sparser, Faster, Lighter Transformer Language Models",
+      "url": "http://arxiv.org/abs/2603.23198",
+      "venue": "ARXIV 2026",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "53QHBIEL"
+    },
+    {
+      "title": "Crab: A Semantics-Aware Checkpoint/Restore Runtime for Agent Sandboxes",
+      "url": "https://arxiv.org/abs/2604.28138v1",
+      "venue": "WEBPAGE 2026",
+      "category": "MISC",
+      "status": "queued",
+      "zoteroKey": "2FC83L2D"
+    },
     {
       "title": "BOute: Cost-Efficient LLM Serving with Heterogeneous LLMs and GPUs via Multi-Objective Bayesian Optimization",
       "url": "http://arxiv.org/abs/2602.10729",
